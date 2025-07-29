@@ -20,7 +20,6 @@ add_subdirectory(Controller)
 find_package(Qt6 REQUIRED COMPONENTS
     Quick
     Gui
-    Core
     Qml
 )
 
@@ -28,6 +27,18 @@ target_link_libraries(${PROJECT_NAME}
     PUBLIC 
         Qt6::Quick
         Qt6::Gui
-        Qt6::Core
         Qt6::Qml
+        Model 
+        Controller
 )
+
+if(WIN32)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Model>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Controller>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    )
+endif()

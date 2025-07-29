@@ -1,5 +1,5 @@
 #pragma once
-#include "../Model/Model.hpp"
+#include "Model.hpp"
 #include <QObject>
 #include <QString>
 

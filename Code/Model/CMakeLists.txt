@@ -1,13 +1,17 @@
 file(GLOB MODEL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
-file(GLOB VIEW_MODEL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
 
-target_sources(${CMAKE_PROJECT_NAME}
-    PRIVATE 
-        ${MODEL_SOURCES}
-        ${VIEW_MODEL_HEADERS}
+add_library(Model SHARED ${MODEL_SOURCES})
+
+find_package(Qt6 REQUIRED COMPONENTS
+    Core
 )
 
-target_include_directories(${CMAKE_PROJECT_NAME}
-    PRIVATE 
+target_link_libraries(Model 
+    PUBLIC 
+        Qt6::Core
+)
+
+target_include_directories(Model
+    PUBLIC 
         ${CMAKE_CURRENT_LIST_DIR}
 )

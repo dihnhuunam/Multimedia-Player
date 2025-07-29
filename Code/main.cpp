@@ -2,8 +2,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QDebug>
-#include "Model/Model.hpp"
-#include "Controller/Controller.hpp"
+#include "Model.hpp"
+#include "Controller.hpp"
 
 int main(int argc, char *argv[])
 {
