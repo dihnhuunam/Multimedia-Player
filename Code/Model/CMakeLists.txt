@@ -1,12 +1,13 @@
-file(GLOB MODELS *.cpp)
+file(GLOB MODEL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
+file(GLOB VIEW_MODEL_HEADERS ${CMAKE_CURRENT_LIST_DIR}/*.hpp)
 
-add_library(model_lib 
-    SHARED 
-        ${MODELS}
+target_sources(${CMAKE_PROJECT_NAME}
+    PRIVATE 
+        ${MODEL_SOURCES}
+        ${VIEW_MODEL_HEADERS}
 )
 
-target_include_directories(model_lib    
-    PUBLIC 
-        ${CMAKE_CURRENT_SOURCE_DIR}
+target_include_directories(${CMAKE_PROJECT_NAME}
+    PRIVATE 
+        ${CMAKE_CURRENT_LIST_DIR}
 )
-
