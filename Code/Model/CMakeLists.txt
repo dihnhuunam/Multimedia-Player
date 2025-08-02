@@ -1,17 +1,20 @@
-file(GLOB MODEL_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
+add_library(Model 
+    SHARED
+        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/IAuthModel.cpp
+        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/DatabaseAuthModel.cpp
+)
 
-add_library(Model SHARED ${MODEL_SOURCES})
+target_include_directories(Model
+    PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
+)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
 )
 
-target_link_libraries(Model 
-    PUBLIC 
+target_link_libraries(Model
+    PUBLIC
         Qt6::Core
-)
-
-target_include_directories(Model
-    PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}
+        API
 )
