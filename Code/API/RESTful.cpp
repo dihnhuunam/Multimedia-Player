@@ -4,7 +4,8 @@
 
 RESTful::RESTful(const QString &baseURL, QObject *parent)
     : m_baseURL(baseURL),
-      QObject(parent)
+      QObject(parent),
+      m_networkManager(new QNetworkAccessManager(this))
 {
     initializeEndpoints();
 }
@@ -20,18 +21,19 @@ QNetworkRequest RESTful::createRequest(const QString &endpointKey, const QString
 {
     // Get corresponding enpoint
     QString endpoint = m_endpoints.value(endpointKey, "");
-    if(endpoint.isEmpty())
+    if (endpoint.isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": Endpoint key not found: " << endpointKey;
         return QNetworkRequest();
     }
-    
+
     // Create request
     QUrl url(m_baseURL + endpoint);
+    qDebug() << url;
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
     // Check the existence of token
-    if(!token.isEmpty())
+    if (!token.isEmpty())
     {
         request.setRawHeader("Authorization", "Bearer " + token.toUtf8());
     }
@@ -41,7 +43,7 @@ QNetworkRequest RESTful::createRequest(const QString &endpointKey, const QString
 QNetworkReply *RESTful::get(const QString &endpointKey, const QString token)
 {
     QNetworkRequest request = createRequest(endpointKey, token);
-    if(request.url().isEmpty())
+    if (request.url().isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": endpoint is empty";
         return nullptr;
@@ -52,7 +54,7 @@ QNetworkReply *RESTful::get(const QString &endpointKey, const QString token)
 QNetworkReply *RESTful::post(const QString &endpointKey, const QJsonObject &data, const QString token)
 {
     QNetworkRequest request = createRequest(endpointKey, token);
-    if(request.url().isEmpty())
+    if (request.url().isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": endpoint is empty";
         return nullptr;
@@ -64,7 +66,7 @@ QNetworkReply *RESTful::post(const QString &endpointKey, const QJsonObject &data
 QNetworkReply *RESTful::put(const QString &endpointKey, const QJsonObject &data, const QString token)
 {
     QNetworkRequest request = createRequest(endpointKey, token);
-    if(request.url().isEmpty())
+    if (request.url().isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": endpoint is empty";
         return nullptr;
@@ -76,7 +78,7 @@ QNetworkReply *RESTful::put(const QString &endpointKey, const QJsonObject &data,
 QNetworkReply *RESTful::del(const QString &endpointKey, const QString token)
 {
     QNetworkRequest request = createRequest(endpointKey, token);
-    if(request.url().isEmpty())
+    if (request.url().isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": endpoint is empty";
         return nullptr;
