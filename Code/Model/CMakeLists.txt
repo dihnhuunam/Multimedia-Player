@@ -1,6 +1,5 @@
 add_library(Model 
     SHARED
-        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/IAuthModel.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/DatabaseAuthModel.cpp
 )
 
@@ -17,4 +16,5 @@ target_link_libraries(Model
     PUBLIC
         Qt6::Core
         API
+        Service
 )
