@@ -1,0 +1,44 @@
+#pragma once
+#include <QObject>
+#include <QSettings>
+#include <QString>
+#include <QJsonObject>
+
+class AppState : public QObject
+{
+    Q_OBJECT
+public:
+    static AppState *instance();
+
+    void saveToken(const QString &token);
+    void clearToken();
+    void saveUserInfo(const QJsonObject &user);
+    QString getToken() const;
+
+    QString email() const;
+    QString name() const;
+    QString dateOfBirth() const;
+    QString role() const;
+    int userId() const;
+
+    void setEmail(const QString &email);
+    void setName(const QString &name);
+    void setDateOfBirth(const QString &dateOfBirth);
+    void setRole(const QString &role);
+    void setUserId(int userId);
+    void setToken(const QString &token);
+
+signals:
+    void valueChanged();
+
+private:
+    AppState(QObject *parent = nullptr);
+    static AppState *m_instance;
+    QSettings *m_settings;
+    QString m_email;
+    QString m_name;
+    QString m_dateOfBirth;
+    QString m_role;
+    int m_userId;
+    QString m_token;
+};

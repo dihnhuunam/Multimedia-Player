@@ -1,6 +1,7 @@
-file(GLOB SERVICE_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
-
-add_library(Service SHARED ${SERVICE_SOURCES})
+add_library(Service 
+    SHARED 
+        ${CMAKE_CURRENT_SOURCE_DIR}/AppState.cpp
+)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
@@ -13,5 +14,5 @@ target_link_libraries(Service
 
 target_include_directories(Service
     PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}
 )
