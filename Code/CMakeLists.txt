@@ -16,7 +16,7 @@ add_executable(${PROJECT_NAME}
 
 add_subdirectory(Model)
 add_subdirectory(API)
-# add_subdirectory(Controller)
+add_subdirectory(Service)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Quick
@@ -31,8 +31,8 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Qml
         API
         Model 
+        Service
         # Controller
-        # Service
 )
 
 if(WIN32)
@@ -42,6 +42,9 @@ if(WIN32)
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             $<TARGET_FILE:API>
+            $<TARGET_FILE_DIR:${PROJECT_NAME}>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            $<TARGET_FILE:Service>
             $<TARGET_FILE_DIR:${PROJECT_NAME}>
         # COMMAND ${CMAKE_COMMAND} -E copy_if_different
         #     $<TARGET_FILE:Controller>
