@@ -13,7 +13,7 @@ DatabaseAuthModel::DatabaseAuthModel(APIFactory *apiFactory, QObject *parent)
 void DatabaseAuthModel::loginUser(const QString &email, const QString &password)
 {
     // Handle invalid input
-    if (email.isEmpty() && password.isEmpty())
+    if (email.isEmpty() || password.isEmpty())
     {
         emit loginResult(false, "email or password are requiered");
         return;

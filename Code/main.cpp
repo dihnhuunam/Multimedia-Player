@@ -10,10 +10,6 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
-    APIFactory *api = new APIFactory("http://localhost:3000/api");
-    IAuthModel *authModel = new DatabaseAuthModel(api);
-    authModel->loginUser("nam@gmail.com", "Nam123");
-
     const QUrl url("qrc:/View/Main.qml");
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl)
                      {
