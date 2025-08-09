@@ -1,11 +1,11 @@
 add_library(Controller 
-    SHARED 
+    STATIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/AuthController.cpp
 )
 
 target_include_directories(Controller
     PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}/Authentication
+        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
 )
 
 find_package(Qt6 REQUIRED COMPONENTS

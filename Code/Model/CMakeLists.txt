@@ -1,5 +1,5 @@
 add_library(Model 
-    SHARED
+    STATIC
         ${CMAKE_CURRENT_SOURCE_DIR}/User/UserModel.cpp
     )
 
@@ -15,5 +15,4 @@ find_package(Qt6 REQUIRED COMPONENTS
 target_link_libraries(Model
     PUBLIC
         Qt6::Core
-        Service
 )

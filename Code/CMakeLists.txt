@@ -29,8 +29,6 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Quick
         Qt6::Gui
         Qt6::Qml
-        Service
-        Model
         Controller
 )
 

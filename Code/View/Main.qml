@@ -1,75 +1,95 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 1.15
 
-Window {
-    id: window
-    width: 640
-    height: 480
+ApplicationWindow {
+    id: root
     visible: true
-    title: "Login Demo"
+    width: 400
+    height: 500
+    title: "Login"
 
     ColumnLayout {
-        anchors.centerIn: parent
-        spacing: 10
+        anchors.fill: parent
+        anchors.margins: 20
 
-        // Thông báo khởi tạo
         Text {
-            id: initText
-            text: "Running initial login tests..."
-            color: "blue"
+            text: "Login"
+            font.bold: true
+            font.pixelSize: 16
             Layout.fillWidth: true
-            wrapMode: Text.Wrap
         }
 
-        // Nhập email
         TextField {
             id: emailField
-            placeholderText: "Enter email"
+            placeholderText: "Email"
             Layout.fillWidth: true
-            text: "nam@gmail.com" // Giá trị mặc định
         }
 
-        // Nhập password
         TextField {
             id: passwordField
-            placeholderText: "Enter password"
+            placeholderText: "Password"
             echoMode: TextInput.Password
             Layout.fillWidth: true
-            text: "Nam1234" // Giá trị mặc định
         }
 
-        // Nút đăng nhập
         Button {
             text: "Login"
-            Layout.alignment: Qt.AlignHCenter
+            Layout.fillWidth: true
             onClicked: {
-                authController.loginUser(emailField.text, passwordField.text);
+                if (emailField.text === "" || passwordField.text === "") {
+                    statusMessage.text = "Please enter email and password";
+                    statusMessage.messageColor = "red";
+                } else {
+                    authController.loginUser(emailField.text, passwordField.text);
+                }
             }
         }
 
-        // Hiển thị kết quả
         Text {
-            id: resultText
-            text: "Login result will appear here"
-            color: "black"
+            text: authController.getUserModel.getEmail !== "" ? "User Information" : ""
+            font.bold: true
+            font.pixelSize: 16
+            Layout.fillWidth: true
+            Layout.topMargin: 20
+        }
+
+        ColumnLayout {
+            visible: authController.getUserModel.getEmail !== ""
+            Layout.fillWidth: true
+            Text {
+                text: "Email: " + authController.getUserModel.getEmail
+            }
+            Text {
+                text: "Name: " + authController.getUserModel.getName
+            }
+            // Text {
+            //     text: authController.getUserModel.dateOfBirth.isValid ? "Date of Birth: " + Qt.formatDate(authController.getUserModel.dateOfBirth, "dd/MM/yyyy") : "Date of Birth: N/A"
+            // }
+        }
+
+        Text {
+            id: statusMessage
             Layout.fillWidth: true
             wrapMode: Text.Wrap
+            color: messageColor
+            property string messageColor: "black"
+        }
+
+        Item {
+            Layout.fillHeight: true
         }
     }
 
-    // Kết nối với tín hiệu loginResult từ authController
     Connections {
         target: authController
         function onLoginSuccessed(message) {
-            initText.text = "";
-            resultText.text = "Login successful: " + message;
-            resultText.color = "green";
+            statusMessage.text = message;
+            statusMessage.messageColor = "green";
         }
-
         function onLoginFailed(message) {
-            resultText.text = "Login failed: " + message;
-            resultText.color = "red";
+            statusMessage.text = message;
+            statusMessage.messageColor = "red";
         }
     }
 }

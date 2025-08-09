@@ -1,5 +1,5 @@
 add_library(Service 
-    SHARED 
+    STATIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/App/AppState.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/API/APIFactory.cpp
         ${CMAKE_CURRENT_SOURCE_DIR}/API/RESTful.cpp

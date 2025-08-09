@@ -15,6 +15,7 @@ public:
     Q_INVOKABLE void registerUser(const QString &email, const QString &password, const QString &name, const QString &dob);
     Q_INVOKABLE void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
     Q_INVOKABLE UserModel *getUserModel();
+    
 signals:
     void loginSuccessed(const QString &message);
     void loginFailed(const QString &message);
