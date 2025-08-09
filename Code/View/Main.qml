@@ -47,7 +47,7 @@ ApplicationWindow {
         }
 
         Text {
-            text: authController.getUserModel.getEmail !== "" ? "User Information" : ""
+            text: userModel.email !== "" ? "User Information" : ""
             font.bold: true
             font.pixelSize: 16
             Layout.fillWidth: true
@@ -55,17 +55,17 @@ ApplicationWindow {
         }
 
         ColumnLayout {
-            visible: authController.getUserModel.getEmail !== ""
+            visible: userModel.email !== ""
             Layout.fillWidth: true
             Text {
-                text: "Email: " + authController.getUserModel.getEmail
+                text: "Email: " + userModel.email
             }
             Text {
-                text: "Name: " + authController.getUserModel.getName
+                text: "Name: " + userModel.name
             }
-            // Text {
-            //     text: authController.getUserModel.dateOfBirth.isValid ? "Date of Birth: " + Qt.formatDate(authController.getUserModel.dateOfBirth, "dd/MM/yyyy") : "Date of Birth: N/A"
-            // }
+            Text {
+                text: userModel.dateOfBirth.isValid ? "Date of Birth: " + Qt.formatDate(userModel.dateOfBirth, "dd/MM/yyyy") : "Date of Birth: N/A"
+            }
         }
 
         Text {

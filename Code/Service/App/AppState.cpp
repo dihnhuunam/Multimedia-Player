@@ -6,7 +6,6 @@ AppState *AppState::m_instance = nullptr;
 
 AppState::AppState(QObject *parent)
     : QObject(parent),
-      //   m_settings(new QSettings("MediaPlayer", "AppState", this)),
       m_settings(new QSettings("AppState.ini", QSettings::IniFormat, this)),
       m_userId(-1)
 {
@@ -80,26 +79,80 @@ void AppState::clearToken()
 
 void AppState::saveUserInfo(const QJsonObject &user)
 {
-    setEmail(user.contains("email") ? user["email"].toString() : m_email);
-    setName(user.contains("name") ? user["name"].toString() : m_name);
+    bool changed = false;
 
-    QString dateOfBirth = user.contains("dateOfBirth") ? user["dateOfBirth"].toString() : m_dateOfBirth;
-    if (!dateOfBirth.isEmpty())
+    // Handle email
+    QString newEmail = user.contains("email") ? user["email"].toString() : m_email;
+    if (m_email != newEmail)
     {
-        QDateTime date = QDateTime::fromString(dateOfBirth, Qt::ISODate);
+        m_email = newEmail;
+        m_settings->setValue("user/email", newEmail);
+        changed = true;
+    }
+
+    // Handle name
+    QString newName = user.contains("name") ? user["name"].toString() : m_name;
+    if (m_name != newName)
+    {
+        m_name = newName;
+        m_settings->setValue("user/name", newName);
+        changed = true;
+    }
+
+    // Handle date of birth
+    QString newDateOfBirth = user.contains("dateOfBirth") ? user["dateOfBirth"].toString() : m_dateOfBirth;
+    if (!newDateOfBirth.isEmpty())
+    {
+        QDateTime date = QDateTime::fromString(newDateOfBirth, Qt::ISODate);
         if (date.isValid())
         {
-            setDateOfBirth(dateOfBirth);
+            if (m_dateOfBirth != newDateOfBirth)
+            {
+                m_dateOfBirth = newDateOfBirth;
+                m_settings->setValue("user/dateOfBirth", newDateOfBirth);
+                changed = true;
+            }
         }
         else
         {
-            qDebug() << "Invalid ISO 8601 date format for dob in saveUserInfo:" << dateOfBirth;
-            setDateOfBirth("");
+            qDebug() << "Invalid ISO 8601 date format for dob in saveUserInfo:" << newDateOfBirth;
+            if (!m_dateOfBirth.isEmpty())
+            {
+                m_dateOfBirth.clear();
+                m_settings->setValue("user/dateOfBirth", "");
+                changed = true;
+            }
         }
     }
+    else if (m_dateOfBirth != newDateOfBirth)
+    {
+        m_dateOfBirth = newDateOfBirth;
+        m_settings->setValue("user/dateOfBirth", newDateOfBirth);
+        changed = true;
+    }
 
-    setRole(user.contains("role") ? user["role"].toString() : m_role);
-    setUserId(user.contains("id") ? user["id"].toInt() : m_userId);
+    // Handle role
+    QString newRole = user.contains("role") ? user["role"].toString() : m_role;
+    if (m_role != newRole)
+    {
+        m_role = newRole;
+        m_settings->setValue("user/role", newRole);
+        changed = true;
+    }
+
+    // Handle user ID
+    int newUserId = user.contains("id") ? user["id"].toInt() : m_userId;
+    if (m_userId != newUserId)
+    {
+        m_userId = newUserId;
+        m_settings->setValue("user/id", newUserId);
+        changed = true;
+    }
+
+    if (changed)
+    {
+        emit valueChanged();
+    }
 }
 
 QString AppState::getToken() const

@@ -17,6 +17,7 @@ int main(int argc, char *argv[])
     AuthController *authController = new AuthController(authService, appState, userModel);
 
     engine.rootContext()->setContextProperty("authController", authController);
+    engine.rootContext()->setContextProperty("userModel", userModel);
 
     const QUrl url("qrc:/View/Main.qml");
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl)
