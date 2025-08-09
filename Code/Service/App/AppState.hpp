@@ -15,11 +15,11 @@ public:
     void saveUserInfo(const QJsonObject &user);
     QString getToken() const;
 
-    QString email() const;
-    QString name() const;
-    QString dateOfBirth() const;
-    QString role() const;
-    int userId() const;
+    QString getEmail() const;
+    QString getName() const;
+    QString getDateOfBirth() const;
+    QString getRole() const;
+    int getUserId() const;
 
     void setEmail(const QString &email);
     void setName(const QString &name);

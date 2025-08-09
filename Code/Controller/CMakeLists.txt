@@ -1,6 +1,12 @@
-file(GLOB CONTROLLER_SOURCES ${CMAKE_CURRENT_LIST_DIR}/*.cpp)
+add_library(Controller 
+    SHARED 
+        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/AuthController.cpp
+)
 
-add_library(Controller SHARED ${CONTROLLER_SOURCES})
+target_include_directories(Controller
+    PUBLIC 
+        ${CMAKE_CURRENT_LIST_DIR}/Authentication
+)
 
 find_package(Qt6 REQUIRED COMPONENTS
     Core
@@ -9,10 +15,8 @@ find_package(Qt6 REQUIRED COMPONENTS
 target_link_libraries(Controller 
     PUBLIC 
         Qt6::Core
-        Model 
+        Model
+        Service
 )
 
-target_include_directories(Controller
-    PUBLIC 
-        ${CMAKE_CURRENT_LIST_DIR}
-)
+

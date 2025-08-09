@@ -1,11 +1,11 @@
 add_library(Model 
     SHARED
-        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication/DatabaseAuthModel.cpp
-)
+        ${CMAKE_CURRENT_SOURCE_DIR}/User/UserModel.cpp
+    )
 
 target_include_directories(Model
     PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
+        ${CMAKE_CURRENT_SOURCE_DIR}/User
 )
 
 find_package(Qt6 REQUIRED COMPONENTS
@@ -15,6 +15,5 @@ find_package(Qt6 REQUIRED COMPONENTS
 target_link_libraries(Model
     PUBLIC
         Qt6::Core
-        API
         Service
 )

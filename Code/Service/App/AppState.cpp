@@ -87,13 +87,14 @@ void AppState::saveUserInfo(const QJsonObject &user)
     if (!dateOfBirth.isEmpty())
     {
         QDateTime date = QDateTime::fromString(dateOfBirth, Qt::ISODate);
-        if (!date.isValid())
+        if (date.isValid())
         {
-            qDebug() << "Invalid ISO 8601 date format for dob in saveUserInfo:" << dateOfBirth;
+            setDateOfBirth(dateOfBirth);
         }
         else
         {
-            setDateOfBirth(dateOfBirth);
+            qDebug() << "Invalid ISO 8601 date format for dob in saveUserInfo:" << dateOfBirth;
+            setDateOfBirth("");
         }
     }
 
@@ -106,27 +107,27 @@ QString AppState::getToken() const
     return m_token;
 }
 
-QString AppState::email() const
+QString AppState::getEmail() const
 {
     return m_email;
 }
 
-QString AppState::name() const
+QString AppState::getName() const
 {
     return m_name;
 }
 
-QString AppState::dateOfBirth() const
+QString AppState::getDateOfBirth() const
 {
     return m_dateOfBirth;
 }
 
-QString AppState::role() const
+QString AppState::getRole() const
 {
     return m_role;
 }
 
-int AppState::userId() const
+int AppState::getUserId() const
 {
     return m_userId;
 }

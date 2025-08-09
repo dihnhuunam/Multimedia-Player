@@ -1,21 +1,21 @@
-#include "DatabaseAuthModel.hpp"
+#include "AuthService.hpp"
 #include "AppState.hpp"
 #include <QDebug>
 #include <QJsonObject>
 #include <QNetworkReply>
 #include <QDateTime>
 
-DatabaseAuthModel::DatabaseAuthModel(APIFactory *apiFactory, QObject *parent)
+AuthService::AuthService(APIFactory *apiFactory, QObject *parent)
     : m_restful(apiFactory->createRESTful()), QObject(parent)
 {
 }
 
-void DatabaseAuthModel::loginUser(const QString &email, const QString &password)
+void AuthService::loginUser(const QString &email, const QString &password)
 {
     // Handle invalid input
     if (email.isEmpty() || password.isEmpty())
     {
-        emit loginResult(false, "email or password are requiered");
+        emit loginFailed("email or password are required");
         return;
     }
 
@@ -28,18 +28,18 @@ void DatabaseAuthModel::loginUser(const QString &email, const QString &password)
     QNetworkReply *reply = m_restful->post("login", json);
     if (!reply)
     {
-        emit loginResult(false, "Invalid endpoint for login");
+        emit loginFailed("Invalid endpoint for login");
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &DatabaseAuthModel::onLoginFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onLoginFinished);
 }
 
-void DatabaseAuthModel::registerUser(const QString &email, const QString &password, const QString &name, const QString &dob)
+void AuthService::registerUser(const QString &email, const QString &password, const QString &name, const QString &dob)
 {
     // Handle invalid input
     if (email.isEmpty() || password.isEmpty() || name.isEmpty() || dob.isEmpty())
     {
-        emit registerResult(false, "Email, password, name, and date of birth are required");
+        emit registerFailed("Email, password, name, and date of birth are required");
         return;
     }
 
@@ -62,7 +62,7 @@ void DatabaseAuthModel::registerUser(const QString &email, const QString &passwo
         }
         else
         {
-            emit registerResult(false, "Invalid dateOfBirth format");
+            emit registerFailed("Invalid dateOfBirth format");
             return;
         }
     }
@@ -72,24 +72,24 @@ void DatabaseAuthModel::registerUser(const QString &email, const QString &passwo
     QNetworkReply *reply = m_restful->post("register", json);
     if (!reply)
     {
-        emit registerResult(false, "Invalid endpoint for register");
+        emit registerFailed("Invalid endpoint for register");
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &DatabaseAuthModel::onRegisterFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onRegisterFinished);
 }
 
-void DatabaseAuthModel::changePassword(const int &userId, const QString &oldPassword, const QString &newPassword)
+void AuthService::changePassword(const int &userId, const QString &oldPassword, const QString &newPassword)
 {
     // Handle invalid input
     if (userId <= 0)
     {
-        emit changePasswordResult(false, "Invalid User ID");
+        emit changePasswordFailed("Invalid User ID");
         return;
     }
 
     if (oldPassword.isEmpty() || newPassword.isEmpty())
     {
-        emit changePasswordResult(false, "Both current and new password are required");
+        emit changePasswordFailed("Both current and new password are required");
         return;
     }
 
@@ -98,28 +98,26 @@ void DatabaseAuthModel::changePassword(const int &userId, const QString &oldPass
     QJsonObject json;
     json["password"] = newPassword;
 
-    // Handle reply reply
+    // Handle reply
     QNetworkReply *reply = m_restful->put(endpoint, json, AppState::instance()->getToken());
     if (!reply)
     {
-        emit changePasswordResult(false, "Invalid endpoint for update");
+        emit changePasswordFailed("Invalid endpoint for update");
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &DatabaseAuthModel::onChangePasswordFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onChangePasswordFinished);
 }
 
-void DatabaseAuthModel::onLoginFinished()
+void AuthService::onLoginFinished()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     if (!reply)
     {
-        emit loginResult(false, "Invalid reply object");
+        emit loginFailed("Invalid reply object");
         return;
     }
 
-    bool success = false;
     QString message;
-
     int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
@@ -130,7 +128,7 @@ void DatabaseAuthModel::onLoginFinished()
         {
             QJsonObject obj = doc.object();
             message = obj["message"].toString();
-            success = !message.contains("error", Qt::CaseInsensitive);
+            bool success = !message.contains("error", Qt::CaseInsensitive);
 
             if (success)
             {
@@ -140,18 +138,21 @@ void DatabaseAuthModel::onLoginFinished()
                     QJsonObject user = obj["user"].toObject();
                     AppState::instance()->saveToken(token);
                     AppState::instance()->saveUserInfo(user);
+                    emit loginSuccessed(message);
                 }
                 else
                 {
-                    success = false;
-                    message = "Invalid login response from server";
+                    emit loginFailed("Invalid login response from server");
                 }
             }
+            else
+            {
+                emit loginFailed(message);
+            }
         }
         else
         {
-            success = false;
-            message = "Invalid response from server";
+            emit loginFailed("Invalid response from server");
         }
     }
     else
@@ -203,24 +204,22 @@ void DatabaseAuthModel::onLoginFinished()
                 message = "Unknown error occurred";
             break;
         }
+        emit loginFailed(message);
     }
 
-    emit loginResult(success, message);
     reply->deleteLater();
 }
 
-void DatabaseAuthModel::onRegisterFinished()
+void AuthService::onRegisterFinished()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     if (!reply)
     {
-        emit registerResult(false, "Invalid reply object");
+        emit registerFailed("Invalid reply object");
         return;
     }
 
-    bool success = false;
     QString message;
-
     int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
@@ -231,12 +230,11 @@ void DatabaseAuthModel::onRegisterFinished()
         {
             QJsonObject obj = doc.object();
             message = obj["message"].toString();
-            success = !message.contains("error", Qt::CaseInsensitive);
+            emit registerSuccess(message);
         }
         else
         {
-            success = false;
-            message = "Invalid response from server";
+            emit registerFailed("Invalid response from server");
         }
     }
     else
@@ -288,24 +286,22 @@ void DatabaseAuthModel::onRegisterFinished()
                 message = "Unknown error occurred";
             break;
         }
+        emit registerFailed(message);
     }
 
-    emit registerResult(success, message);
     reply->deleteLater();
 }
 
-void DatabaseAuthModel::onChangePasswordFinished()
+void AuthService::onChangePasswordFinished()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     if (!reply)
     {
-        emit changePasswordResult(false, "Invalid reply object");
+        emit changePasswordFailed("Invalid reply object");
         return;
     }
 
-    bool success = false;
     QString message;
-
     int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
 
     if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
@@ -316,18 +312,16 @@ void DatabaseAuthModel::onChangePasswordFinished()
         {
             QJsonObject obj = doc.object();
             message = obj["message"].toString();
-            success = !message.contains("error", Qt::CaseInsensitive);
-
-            if (success && obj.contains("user"))
+            if (obj.contains("user"))
             {
                 QJsonObject user = obj["user"].toObject();
                 AppState::instance()->saveUserInfo(user);
             }
+            emit changePasswordSuccess(message);
         }
         else
         {
-            success = false;
-            message = "Invalid response from server";
+            emit changePasswordFailed("Invalid response from server");
         }
     }
     else
@@ -379,8 +373,8 @@ void DatabaseAuthModel::onChangePasswordFinished()
                 message = "Unknown error occurred";
             break;
         }
+        emit changePasswordFailed(message);
     }
 
-    emit changePasswordResult(success, message);
     reply->deleteLater();
 }
