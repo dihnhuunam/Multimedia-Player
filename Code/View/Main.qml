@@ -1,95 +1,20 @@
-import QtQuick 2.15
-import QtQuick.Controls 2.15
-import QtQuick.Layouts 1.15
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Window
+import "Helper"
 
 ApplicationWindow {
     id: root
+    width: 1400
+    height: 900
+    minimumWidth: 1400
+    minimumHeight: 900
     visible: true
-    width: 400
-    height: 500
-    title: "Login"
+    title: "Media Player"
 
-    ColumnLayout {
+    Loader {
+        id: mainLoader
         anchors.fill: parent
-        anchors.margins: 20
-
-        Text {
-            text: "Login"
-            font.bold: true
-            font.pixelSize: 16
-            Layout.fillWidth: true
-        }
-
-        TextField {
-            id: emailField
-            placeholderText: "Email"
-            Layout.fillWidth: true
-        }
-
-        TextField {
-            id: passwordField
-            placeholderText: "Password"
-            echoMode: TextInput.Password
-            Layout.fillWidth: true
-        }
-
-        Button {
-            text: "Login"
-            Layout.fillWidth: true
-            onClicked: {
-                if (emailField.text === "" || passwordField.text === "") {
-                    statusMessage.text = "Please enter email and password";
-                    statusMessage.messageColor = "red";
-                } else {
-                    authController.loginUser(emailField.text, passwordField.text);
-                }
-            }
-        }
-
-        Text {
-            text: userModel.email !== "" ? "User Information" : ""
-            font.bold: true
-            font.pixelSize: 16
-            Layout.fillWidth: true
-            Layout.topMargin: 20
-        }
-
-        ColumnLayout {
-            visible: userModel.email !== ""
-            Layout.fillWidth: true
-            Text {
-                text: "Email: " + userModel.email
-            }
-            Text {
-                text: "Name: " + userModel.name
-            }
-            Text {
-                text: userModel.dateOfBirth.isValid ? "Date of Birth: " + Qt.formatDate(userModel.dateOfBirth, "dd/MM/yyyy") : "Date of Birth: N/A"
-            }
-        }
-
-        Text {
-            id: statusMessage
-            Layout.fillWidth: true
-            wrapMode: Text.Wrap
-            color: messageColor
-            property string messageColor: "black"
-        }
-
-        Item {
-            Layout.fillHeight: true
-        }
-    }
-
-    Connections {
-        target: authController
-        function onLoginSuccessed(message) {
-            statusMessage.text = message;
-            statusMessage.messageColor = "green";
-        }
-        function onLoginFailed(message) {
-            statusMessage.text = message;
-            statusMessage.messageColor = "red";
-        }
+        source: NavigationManager.currentScreen
     }
 }

@@ -15,9 +15,9 @@ class AuthService : public QObject
     Q_OBJECT
 public:
     explicit AuthService(APIFactory *apiFactory, QObject *parent = nullptr);
-    Q_INVOKABLE void loginUser(const QString &email, const QString &password);
-    Q_INVOKABLE void registerUser(const QString &email, const QString &password, const QString &name, const QString &dob);
-    Q_INVOKABLE void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
+    void loginUser(const QString &email, const QString &password);
+    void registerUser(const QString &email, const QString &password, const QString &name, const QString &dob);
+    void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
 
 signals:
     void loginFinished(bool success, const UserData &userData);

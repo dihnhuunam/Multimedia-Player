@@ -1,7 +1,12 @@
 <RCC>
     <qresource prefix="/">
         <file>View/Main.qml</file>
-        <!-- <file>View/LoginView.qml</file> -->
-        <!-- <file>View/RegisterView.qml</file> -->
+    
+        <file>View/Authentication/LoginView.qml</file>
+        <file>View/Authentication/RegisterView.qml</file>
+        
+        <file>View/Helper/NavigationManager.qml</file>
+        
+        <file>View/Components/HoverButton.qml</file>
     </qresource>
 </RCC>
