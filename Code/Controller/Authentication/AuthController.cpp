@@ -6,11 +6,6 @@
 AuthController::AuthController(AuthService *authService, AppState *appState, UserModel *userModel, QObject *parent)
     : QObject(parent), authService(authService), appState(appState), userModel(userModel)
 {
-    Q_ASSERT(authService != nullptr);
-    Q_ASSERT(appState != nullptr);
-    Q_ASSERT(userModel != nullptr);
-    qDebug() << "AuthService pointer:" << authService;
-
     // Handle Login
     connect(authService, &AuthService::loginFinished, this, &AuthController::onLoginFinished);
 
