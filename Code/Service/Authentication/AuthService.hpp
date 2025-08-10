@@ -1,6 +1,14 @@
 #pragma once
 #include "APIFactory.hpp"
 #include <QObject>
+#include <QJsonObject>
+
+struct UserData
+{
+    QString message;
+    QString token;
+    QJsonObject user;
+};
 
 class AuthService : public QObject
 {
@@ -12,17 +20,14 @@ public:
     Q_INVOKABLE void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
 
 signals:
-    void loginSuccessed(const QString &message);
-    void loginFailed(const QString &message);
-    void registerSuccess(const QString &message);
-    void registerFailed(const QString &message);
-    void changePasswordSuccess(const QString &message);
-    void changePasswordFailed(const QString &message);
+    void loginFinished(bool success, const UserData &userData);
+    void registerFinished(bool success, const UserData &userData);
+    void changePasswordFinished(bool success, const UserData &userData);
 
 private slots:
-    void onLoginFinished();
-    void onRegisterFinished();
-    void onChangePasswordFinished();
+    void onLoginReply();
+    void onRegisterReply();
+    void onChangePasswordReply();
 
 private:
     RESTful *m_restful;

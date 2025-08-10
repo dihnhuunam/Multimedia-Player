@@ -1,5 +1,4 @@
 #include "AuthService.hpp"
-#include "AppState.hpp"
 #include <QDebug>
 #include <QJsonObject>
 #include <QNetworkReply>
@@ -15,7 +14,9 @@ void AuthService::loginUser(const QString &email, const QString &password)
     // Handle invalid input
     if (email.isEmpty() || password.isEmpty())
     {
-        emit loginFailed("email or password are required");
+        UserData userData;
+        userData.message = "Email or password are required";
+        emit loginFinished(false, userData);
         return;
     }
 
@@ -28,10 +29,12 @@ void AuthService::loginUser(const QString &email, const QString &password)
     QNetworkReply *reply = m_restful->post("login", json);
     if (!reply)
     {
-        emit loginFailed("Invalid endpoint for login");
+        UserData userData;
+        userData.message = "Invalid endpoint for login";
+        emit loginFinished(false, userData);
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &AuthService::onLoginFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onLoginReply);
 }
 
 void AuthService::registerUser(const QString &email, const QString &password, const QString &name, const QString &dob)
@@ -39,7 +42,9 @@ void AuthService::registerUser(const QString &email, const QString &password, co
     // Handle invalid input
     if (email.isEmpty() || password.isEmpty() || name.isEmpty() || dob.isEmpty())
     {
-        emit registerFailed("Email, password, name, and date of birth are required");
+        UserData userData;
+        userData.message = "Email, password, name, and date of birth are required";
+        emit registerFinished(false, userData);
         return;
     }
 
@@ -62,7 +67,9 @@ void AuthService::registerUser(const QString &email, const QString &password, co
         }
         else
         {
-            emit registerFailed("Invalid dateOfBirth format");
+            UserData userData;
+            userData.message = "Invalid dateOfBirth format";
+            emit registerFinished(false, userData);
             return;
         }
     }
@@ -72,10 +79,12 @@ void AuthService::registerUser(const QString &email, const QString &password, co
     QNetworkReply *reply = m_restful->post("register", json);
     if (!reply)
     {
-        emit registerFailed("Invalid endpoint for register");
+        UserData userData;
+        userData.message = "Invalid endpoint for register";
+        emit registerFinished(false, userData);
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &AuthService::onRegisterFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onRegisterReply);
 }
 
 void AuthService::changePassword(const int &userId, const QString &oldPassword, const QString &newPassword)
@@ -83,13 +92,17 @@ void AuthService::changePassword(const int &userId, const QString &oldPassword, 
     // Handle invalid input
     if (userId <= 0)
     {
-        emit changePasswordFailed("Invalid User ID");
+        UserData userData;
+        userData.message = "Invalid User ID";
+        emit changePasswordFinished(false, userData);
         return;
     }
 
     if (oldPassword.isEmpty() || newPassword.isEmpty())
     {
-        emit changePasswordFailed("Both current and new password are required");
+        UserData userData;
+        userData.message = "Both current and new password are required";
+        emit changePasswordFinished(false, userData);
         return;
     }
 
@@ -99,282 +112,279 @@ void AuthService::changePassword(const int &userId, const QString &oldPassword, 
     json["password"] = newPassword;
 
     // Handle reply
-    QNetworkReply *reply = m_restful->put(endpoint, json, AppState::instance()->getToken());
+    QNetworkReply *reply = m_restful->put(endpoint, json, "");
     if (!reply)
     {
-        emit changePasswordFailed("Invalid endpoint for update");
+        UserData userData;
+        userData.message = "Invalid endpoint for update";
+        emit changePasswordFinished(false, userData);
         return;
     }
-    connect(reply, &QNetworkReply::finished, this, &AuthService::onChangePasswordFinished);
+    connect(reply, &QNetworkReply::finished, this, &AuthService::onChangePasswordReply);
 }
 
-void AuthService::onLoginFinished()
+void AuthService::onLoginReply()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    UserData userData;
+    bool success = false;
+
     if (!reply)
     {
-        emit loginFailed("Invalid reply object");
+        userData.message = "Invalid reply object";
+        emit loginFinished(false, userData);
         return;
     }
 
-    QString message;
     int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray responseData = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(responseData);
 
     if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
     {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
         if (!doc.isNull() && doc.isObject())
         {
             QJsonObject obj = doc.object();
-            message = obj["message"].toString();
-            bool success = !message.contains("error", Qt::CaseInsensitive);
-
-            if (success)
+            userData.message = obj["message"].toString();
+            if (obj.contains("token") && obj.contains("user"))
             {
-                if (obj.contains("token") && obj.contains("user"))
-                {
-                    QString token = obj["token"].toString();
-                    QJsonObject user = obj["user"].toObject();
-                    AppState::instance()->saveToken(token);
-                    AppState::instance()->saveUserInfo(user);
-                    emit loginSuccessed(message);
-                }
-                else
-                {
-                    emit loginFailed("Invalid login response from server");
-                }
+                userData.token = obj["token"].toString();
+                userData.user = obj["user"].toObject();
+                success = true;
             }
             else
             {
-                emit loginFailed(message);
+                userData.message = "Invalid login response from server";
             }
         }
         else
         {
-            emit loginFailed("Invalid response from server");
+            userData.message = "Invalid response from server";
         }
     }
     else
     {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
         if (!doc.isNull() && doc.isObject())
         {
             QJsonObject obj = doc.object();
-            message = obj["message"].toString();
-            if (message.isEmpty())
+            userData.message = obj["message"].toString();
+            if (userData.message.isEmpty())
             {
-                message = reply->errorString();
+                userData.message = reply->errorString();
             }
         }
         else
         {
-            message = reply->errorString();
+            userData.message = reply->errorString();
         }
 
         switch (httpStatus)
         {
         case 400:
-            if (message.isEmpty())
-                message = "Bad request: Invalid input data";
+            if (userData.message.isEmpty())
+                userData.message = "Bad request: Invalid input data";
             break;
         case 401:
-            if (message.isEmpty())
-                message = "Unauthorized: Invalid credentials";
+            if (userData.message.isEmpty())
+                userData.message = "Unauthorized: Invalid credentials";
             break;
         case 403:
-            if (message.isEmpty())
-                message = "Forbidden: Insufficient permissions";
+            if (userData.message.isEmpty())
+                userData.message = "Forbidden: Insufficient permissions";
             break;
         case 404:
-            if (message.isEmpty())
-                message = "Resource not found";
+            if (userData.message.isEmpty())
+                userData.message = "Resource not found";
             break;
         case 409:
-            if (message.isEmpty())
-                message = "Conflict: Resource already exists";
+            if (userData.message.isEmpty())
+                userData.message = "Conflict: Resource already exists";
             break;
         case 500:
-            if (message.isEmpty())
-                message = "Internal server error";
+            if (userData.message.isEmpty())
+                userData.message = "Internal server error";
             break;
         default:
-            if (message.isEmpty())
-                message = "Unknown error occurred";
+            if (userData.message.isEmpty())
+                userData.message = "Unknown error occurred";
             break;
         }
-        emit loginFailed(message);
     }
 
+    emit loginFinished(success, userData);
     reply->deleteLater();
 }
 
-void AuthService::onRegisterFinished()
+void AuthService::onRegisterReply()
 {
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    UserData userData;
+    bool success = false;
+
     if (!reply)
     {
-        emit registerFailed("Invalid reply object");
+        userData.message = "Invalid reply object";
+        emit registerFinished(false, userData);
         return;
     }
 
-    QString message;
     int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray responseData = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(responseData);
 
     if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
     {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
         if (!doc.isNull() && doc.isObject())
         {
             QJsonObject obj = doc.object();
-            message = obj["message"].toString();
-            emit registerSuccess(message);
-        }
-        else
-        {
-            emit registerFailed("Invalid response from server");
-        }
-    }
-    else
-    {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
-        if (!doc.isNull() && doc.isObject())
-        {
-            QJsonObject obj = doc.object();
-            message = obj["message"].toString();
-            if (message.isEmpty())
-            {
-                message = reply->errorString();
-            }
-        }
-        else
-        {
-            message = reply->errorString();
-        }
-
-        switch (httpStatus)
-        {
-        case 400:
-            if (message.isEmpty())
-                message = "Bad request: Invalid input data";
-            break;
-        case 401:
-            if (message.isEmpty())
-                message = "Unauthorized: Invalid credentials";
-            break;
-        case 403:
-            if (message.isEmpty())
-                message = "Forbidden: Insufficient permissions";
-            break;
-        case 404:
-            if (message.isEmpty())
-                message = "Resource not found";
-            break;
-        case 409:
-            if (message.isEmpty())
-                message = "Conflict: Resource already exists";
-            break;
-        case 500:
-            if (message.isEmpty())
-                message = "Internal server error";
-            break;
-        default:
-            if (message.isEmpty())
-                message = "Unknown error occurred";
-            break;
-        }
-        emit registerFailed(message);
-    }
-
-    reply->deleteLater();
-}
-
-void AuthService::onChangePasswordFinished()
-{
-    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
-    if (!reply)
-    {
-        emit changePasswordFailed("Invalid reply object");
-        return;
-    }
-
-    QString message;
-    int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-
-    if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
-    {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
-        if (!doc.isNull() && doc.isObject())
-        {
-            QJsonObject obj = doc.object();
-            message = obj["message"].toString();
+            userData.message = obj["message"].toString();
             if (obj.contains("user"))
             {
-                QJsonObject user = obj["user"].toObject();
-                AppState::instance()->saveUserInfo(user);
+                userData.user = obj["user"].toObject();
             }
-            emit changePasswordSuccess(message);
+            success = true;
         }
         else
         {
-            emit changePasswordFailed("Invalid response from server");
+            userData.message = "Invalid response from server";
         }
     }
     else
     {
-        QByteArray responseData = reply->readAll();
-        QJsonDocument doc = QJsonDocument::fromJson(responseData);
         if (!doc.isNull() && doc.isObject())
         {
             QJsonObject obj = doc.object();
-            message = obj["message"].toString();
-            if (message.isEmpty())
+            userData.message = obj["message"].toString();
+            if (userData.message.isEmpty())
             {
-                message = reply->errorString();
+                userData.message = reply->errorString();
             }
         }
         else
         {
-            message = reply->errorString();
+            userData.message = reply->errorString();
         }
 
         switch (httpStatus)
         {
         case 400:
-            if (message.isEmpty())
-                message = "Bad request: Invalid input data";
+            if (userData.message.isEmpty())
+                userData.message = "Bad request: Invalid input data";
             break;
         case 401:
-            if (message.isEmpty())
-                message = "Unauthorized: Invalid credentials";
+            if (userData.message.isEmpty())
+                userData.message = "Unauthorized: Invalid credentials";
             break;
         case 403:
-            if (message.isEmpty())
-                message = "Forbidden: Insufficient permissions";
+            if (userData.message.isEmpty())
+                userData.message = "Forbidden: Insufficient permissions";
             break;
         case 404:
-            if (message.isEmpty())
-                message = "Resource not found";
+            if (userData.message.isEmpty())
+                userData.message = "Resource not found";
             break;
         case 409:
-            if (message.isEmpty())
-                message = "Conflict: Resource already exists";
+            if (userData.message.isEmpty())
+                userData.message = "Conflict: Resource already exists";
             break;
         case 500:
-            if (message.isEmpty())
-                message = "Internal server error";
+            if (userData.message.isEmpty())
+                userData.message = "Internal server error";
             break;
         default:
-            if (message.isEmpty())
-                message = "Unknown error occurred";
+            if (userData.message.isEmpty())
+                userData.message = "Unknown error occurred";
             break;
         }
-        emit changePasswordFailed(message);
     }
 
+    emit registerFinished(success, userData);
+    reply->deleteLater();
+}
+
+void AuthService::onChangePasswordReply()
+{
+    QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
+    UserData userData;
+    bool success = false;
+
+    if (!reply)
+    {
+        userData.message = "Invalid reply object";
+        emit changePasswordFinished(false, userData);
+        return;
+    }
+
+    int httpStatus = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    QByteArray responseData = reply->readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(responseData);
+
+    if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
+    {
+        if (!doc.isNull() && doc.isObject())
+        {
+            QJsonObject obj = doc.object();
+            userData.message = obj["message"].toString();
+            if (obj.contains("user"))
+            {
+                userData.user = obj["user"].toObject();
+            }
+            success = true;
+        }
+        else
+        {
+            userData.message = "Invalid response from server";
+        }
+    }
+    else
+    {
+        if (!doc.isNull() && doc.isObject())
+        {
+            QJsonObject obj = doc.object();
+            userData.message = obj["message"].toString();
+            if (userData.message.isEmpty())
+            {
+                userData.message = reply->errorString();
+            }
+        }
+        else
+        {
+            userData.message = reply->errorString();
+        }
+
+        switch (httpStatus)
+        {
+        case 400:
+            if (userData.message.isEmpty())
+                userData.message = "Bad request: Invalid input data";
+            break;
+        case 401:
+            if (userData.message.isEmpty())
+                userData.message = "Unauthorized: Invalid credentials";
+            break;
+        case 403:
+            if (userData.message.isEmpty())
+                userData.message = "Forbidden: Insufficient permissions";
+            break;
+        case 404:
+            if (userData.message.isEmpty())
+                userData.message = "Resource not found";
+            break;
+        case 409:
+            if (userData.message.isEmpty())
+                userData.message = "Conflict: Resource already exists";
+            break;
+        case 500:
+            if (userData.message.isEmpty())
+                userData.message = "Internal server error";
+            break;
+        default:
+            if (userData.message.isEmpty())
+                userData.message = "Unknown error occurred";
+            break;
+        }
+    }
+
+    emit changePasswordFinished(success, userData);
     reply->deleteLater();
 }

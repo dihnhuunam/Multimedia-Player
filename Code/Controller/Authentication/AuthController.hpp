@@ -14,8 +14,7 @@ public:
     Q_INVOKABLE void loginUser(const QString &email, const QString &password);
     Q_INVOKABLE void registerUser(const QString &email, const QString &password, const QString &name, const QString &dob);
     Q_INVOKABLE void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
-    Q_INVOKABLE UserModel *getUserModel();
-    
+
 signals:
     void loginSuccessed(const QString &message);
     void loginFailed(const QString &message);
@@ -25,12 +24,9 @@ signals:
     void changePasswordFailed(const QString &message);
 
 private slots:
-    void onLoginSuccessed(const QString &message);
-    void onLoginFailed(const QString &message);
-    void onRegisterSuccess(const QString &message);
-    void onRegisterFailed(const QString &message);
-    void onChangePasswordSuccess(const QString &message);
-    void onChangePasswordFailed(const QString &message);
+    void onLoginFinished(bool success, const UserData &userData);
+    void onRegisterFinished(bool success, const UserData &userData);
+    void onChangePasswordFinished(bool success, const UserData &userData);
 
 private:
     AuthService *authService;
