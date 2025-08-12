@@ -12,10 +12,6 @@ Item {
     property alias username: usernameField.text
     property alias password: passwordField.text
 
-    // Signals
-    signal skipLogin
-    signal navigateToRegister
-
     Rectangle {
         anchors.fill: parent
         color: AuthConstants.lightBackgroundColor

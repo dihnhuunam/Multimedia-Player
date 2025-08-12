@@ -17,10 +17,6 @@ Item {
     property alias birthDay: dayComboBox.currentIndex
     property alias birthYear: yearComboBox.currentIndex
 
-    // Signals
-    signal registerUser
-    signal navigateToLogin
-
     Rectangle {
         anchors.fill: parent
         color: AuthConstants.lightBackgroundColor
