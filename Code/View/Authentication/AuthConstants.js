@@ -55,7 +55,7 @@ var registerPasswordLabel = "Password";
 var registerPasswordPlaceholder = "Enter your password";
 var registerBirthDateLabel = "Date of Birth";
 var registerButtonText = "Register";
-var registerLoginLink = "Already have an account? Login";
+var registerLoginLink = "Already have an account? Sign In";
 var registerSuccessMessage = "Registration successful!";
 var registerFailedMessage = "Registration failed!";
 
