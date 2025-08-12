@@ -9,7 +9,7 @@ function formatDateOfBirth(monthIndex, dayIndex, yearIndex, yearModel) {
     return ""; // Return empty string if any field is not selected
   }
 
-  var month = monthIndex.toString().padStart(2, "0"); // Ensure two digits (e.g., 01)
+  var month = monthIndex.toString().padStart(2, "0"); // Ensure two digits
   var day = dayIndex.toString().padStart(2, "0"); // Ensure two digits
   var year = yearModel[yearIndex]; // Get year from the yearComboBox model
   return `${year}-${month}-${day}`; // Format as YYYY-MM-DD

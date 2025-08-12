@@ -15,8 +15,7 @@ ComboBox {
     property int textMargins: 15
     property int fieldHeight: 50
 
-    // --> THAY ĐỔI 1: Thêm thuộc tính chiều cao tối đa cho popup <--
-    property int popupMaxHeight: 280 // Giới hạn chiều cao popup (ví dụ: 7 mục * 40px)
+    property int popupMaxHeight: 280
 
     implicitHeight: fieldHeight
 
@@ -69,13 +68,9 @@ ComboBox {
         width: root.width
         padding: 1
 
-        // --> THAY ĐỔI 2: Giới hạn chiều cao của popup <--
-        // Chiều cao sẽ là chiều cao nội dung, nhưng không bao giờ vượt quá popupMaxHeight
         height: Math.min(contentItem.contentHeight, root.popupMaxHeight)
 
         contentItem: ListView {
-            // --> THAY ĐỔI 3: Cho phép ListView lấp đầy popup <--
-            // Điều này rất quan trọng để thanh cuộn hoạt động khi chiều cao bị giới hạn
             anchors.fill: parent
 
             clip: true

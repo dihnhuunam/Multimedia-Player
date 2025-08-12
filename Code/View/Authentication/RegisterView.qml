@@ -9,21 +9,6 @@ import "../Helper/RegisterHelper.js" as RegisterHelper
 Item {
     id: root
 
-    function formatDateOfBirth(monthIndex, dayIndex, yearIndex) {
-        if (monthIndex === 0 || dayIndex === 0 || yearIndex === 0) {
-            return ""; // Trả về chuỗi rỗng nếu chưa chọn đầy đủ
-        }
-
-        var month = monthIndex.toString().padStart(2, "0"); // Đảm bảo 2 chữ số (VD: 01)
-        var day = dayIndex.toString().padStart(2, "0"); // Đảm bảo 2 chữ số
-        var year = yearComboBox.model[yearIndex]; // Lấy năm từ model
-        return `${year}-${month}-${day}`; // Định dạng YYYY-MM-DD
-    }
-
-    function getFullName() {
-        return `${firstNameField.text.trim()} ${lastNameField.text.trim()}`.trim();
-    }
-
     // Properties
     property alias firstName: firstNameField.text
     property alias lastName: lastNameField.text
