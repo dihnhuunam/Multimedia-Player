@@ -16,7 +16,7 @@ public:
     Q_INVOKABLE void changePassword(const int &userId, const QString &oldPassword, const QString &newPassword);
 
 signals:
-    void loginSuccessed(const QString &message);
+    void loginSuccess(const QString &message);
     void loginFailed(const QString &message);
     void registerSuccess(const QString &message);
     void registerFailed(const QString &message);

@@ -49,7 +49,7 @@ void AuthController::onLoginFinished(bool success, const UserData &userData)
         userModel->setName(name);
         userModel->setDateOfBirth(dateOfBirth);
 
-        emit loginSuccessed(userData.message);
+        emit loginSuccess(userData.message);
     }
     else
     {
