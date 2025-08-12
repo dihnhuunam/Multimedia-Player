@@ -1,12 +1,19 @@
 <RCC>
     <qresource prefix="/">
         <file>View/Main.qml</file>
-    
+        
         <file>View/Authentication/LoginView.qml</file>
         <file>View/Authentication/RegisterView.qml</file>
+        <file>View/Authentication/AuthConstants.js</file>
         
         <file>View/Helper/NavigationManager.qml</file>
+        <file>View/Helper/RegisterHelper.js</file>
         
-        <file>View/Components/HoverButton.qml</file>
+        <file>View/Components/CustomButton.qml</file>
+        <file>View/Components/CustomTextField.qml</file>
+        <file>View/Components/CustomComboBox.qml</file>
+        <file>View/Components/qmldir</file>
+
+        <file>Assets/calendar.png</file>
     </qresource>
 </RCC>

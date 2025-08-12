@@ -2,57 +2,82 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../Helper"
+import "../Components"
+import "./AuthConstants.js" as AuthConstants
+import "../Helper/RegisterHelper.js" as RegisterHelper
 
 Item {
+    id: root
+
+    function formatDateOfBirth(monthIndex, dayIndex, yearIndex) {
+        if (monthIndex === 0 || dayIndex === 0 || yearIndex === 0) {
+            return ""; // Trả về chuỗi rỗng nếu chưa chọn đầy đủ
+        }
+
+        var month = monthIndex.toString().padStart(2, "0"); // Đảm bảo 2 chữ số (VD: 01)
+        var day = dayIndex.toString().padStart(2, "0"); // Đảm bảo 2 chữ số
+        var year = yearComboBox.model[yearIndex]; // Lấy năm từ model
+        return `${year}-${month}-${day}`; // Định dạng YYYY-MM-DD
+    }
+
+    function getFullName() {
+        return `${firstNameField.text.trim()} ${lastNameField.text.trim()}`.trim();
+    }
+
+    // Properties
     property alias firstName: firstNameField.text
     property alias lastName: lastNameField.text
     property alias email: emailField.text
-    property alias company: companyField.text
-    property alias address: addressField.text
     property alias birthMonth: monthComboBox.currentIndex
     property alias birthDay: dayComboBox.currentIndex
     property alias birthYear: yearComboBox.currentIndex
 
-    // Signals for navigation
+    // Signals
     signal registerUser
     signal navigateToLogin
 
     Rectangle {
         anchors.fill: parent
-        color: "#f8f9fa"
+        color: AuthConstants.lightBackgroundColor
+
+        // MouseArea to remove focus of TextField
+        MouseArea {
+            anchors.fill: parent
+            onClicked: parent.focus = true
+        }
 
         ColumnLayout {
             anchors.centerIn: parent
-            width: 500
-            spacing: 20
+            width: AuthConstants.registerFormWidth
+            spacing: AuthConstants.registerSpacing
 
             // Logo and Title
             ColumnLayout {
                 Layout.alignment: Qt.AlignHCenter
-                spacing: 10
+                spacing: AuthConstants.spacing
 
-                // Logo (using text as placeholder)
+                // Logo
                 Text {
-                    text: "👥 YourEvent"
-                    font.pointSize: 24
+                    text: AuthConstants.registerLogoText
+                    font.pointSize: AuthConstants.logoFontSize
                     font.bold: true
-                    color: "#28a745"
+                    color: AuthConstants.primaryColor
                     Layout.alignment: Qt.AlignHCenter
                 }
 
                 // Title banner
                 Rectangle {
                     Layout.fillWidth: true
-                    height: 50
-                    color: "#e8f5e8"
-                    radius: 8
+                    Layout.preferredHeight: AuthConstants.bannerHeight
+                    color: AuthConstants.lightGreenColor
+                    radius: AuthConstants.borderRadius
 
                     Text {
                         anchors.centerIn: parent
-                        text: "Online Registration"
-                        font.pointSize: 16
+                        text: AuthConstants.registerTitle
+                        font.pointSize: AuthConstants.registerTitleFontSize
                         font.bold: true
-                        color: "#495057"
+                        color: AuthConstants.textColor
                     }
                 }
             }
@@ -60,61 +85,59 @@ Item {
             // Registration Form
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: childrenRect.height + 40
-                color: "white"
-                radius: 8
-                border.color: "#e9ecef"
+                Layout.preferredHeight: childrenRect.height + 2 * AuthConstants.margins
+                color: AuthConstants.whiteColor
+                radius: AuthConstants.borderRadius
+                border.color: AuthConstants.borderColor
                 border.width: 1
 
                 ColumnLayout {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.top: parent.top
-                    anchors.margins: 20
-                    spacing: 20
+                    anchors.margins: AuthConstants.margins
+                    spacing: AuthConstants.registerSpacing
 
                     // First Name and Last Name row
                     RowLayout {
                         Layout.fillWidth: true
-                        spacing: 15
+                        spacing: AuthConstants.spacing
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 8
+                            spacing: AuthConstants.spacing / 2
 
                             Text {
-                                text: "First Name"
-                                font.pointSize: 12
+                                text: AuthConstants.registerFirstNameLabel
+                                font.pointSize: AuthConstants.fieldFontSize
                                 font.bold: true
-                                color: "#495057"
+                                color: AuthConstants.textColor
                             }
 
-                            TextField {
+                            CustomTextField {
                                 id: firstNameField
                                 Layout.fillWidth: true
-                                placeholderText: "First Name"
-                                font.pointSize: 12
-                                height: 40
+                                placeholderText: AuthConstants.registerFirstNameLabel
+                                Layout.preferredHeight: AuthConstants.fieldHeight
                             }
                         }
 
                         ColumnLayout {
                             Layout.fillWidth: true
-                            spacing: 8
+                            spacing: AuthConstants.spacing / 2
 
                             Text {
-                                text: "Last Name"
-                                font.pointSize: 12
+                                text: AuthConstants.registerLastNameLabel
+                                font.pointSize: AuthConstants.fieldFontSize
                                 font.bold: true
-                                color: "#495057"
+                                color: AuthConstants.textColor
                             }
 
-                            TextField {
+                            CustomTextField {
                                 id: lastNameField
                                 Layout.fillWidth: true
-                                placeholderText: "Last Name"
-                                font.pointSize: 12
-                                height: 40
+                                placeholderText: AuthConstants.registerLastNameLabel
+                                Layout.preferredHeight: AuthConstants.fieldHeight
                             }
                         }
                     }
@@ -122,95 +145,83 @@ Item {
                     // Email Address
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 8
+                        spacing: AuthConstants.spacing / 2
 
                         Text {
-                            text: "Email Address"
-                            font.pointSize: 12
+                            text: AuthConstants.registerEmailLabel
+                            font.pointSize: AuthConstants.fieldFontSize
                             font.bold: true
-                            color: "#495057"
+                            color: AuthConstants.textColor
                         }
 
-                        TextField {
+                        CustomTextField {
                             id: emailField
                             Layout.fillWidth: true
-                            placeholderText: "Email Address"
-                            font.pointSize: 12
-                            height: 40
+                            placeholderText: AuthConstants.registerEmailLabel
+                            Layout.preferredHeight: AuthConstants.fieldHeight
                         }
                     }
 
-                    // Company (if applicable)
+                    // Password
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 8
+                        spacing: AuthConstants.spacing / 2
 
                         Text {
-                            text: "Company (if applicable)"
-                            font.pointSize: 12
+                            text: AuthConstants.registerPasswordLabel
+                            font.pointSize: AuthConstants.fieldFontSize
                             font.bold: true
-                            color: "#495057"
+                            color: AuthConstants.textColor
                         }
 
-                        TextField {
-                            id: companyField
+                        CustomTextField {
+                            id: passwordField
                             Layout.fillWidth: true
-                            placeholderText: "Company"
-                            font.pointSize: 12
-                            height: 40
-                        }
-                    }
-
-                    // Physical Address
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 8
-
-                        Text {
-                            text: "Physical Address"
-                            font.pointSize: 12
-                            font.bold: true
-                            color: "#495057"
-                        }
-
-                        TextField {
-                            id: addressField
-                            Layout.fillWidth: true
-                            placeholderText: "Physical Address"
-                            font.pointSize: 12
-                            height: 40
+                            placeholderText: AuthConstants.registerPasswordPlaceholder
+                            Layout.preferredHeight: AuthConstants.fieldHeight
+                            echoMode: TextInput.Password
                         }
                     }
 
                     // Date of Birth
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 8
+                        spacing: AuthConstants.spacing / 2
 
                         Text {
-                            text: "Date of Birth"
-                            font.pointSize: 12
+                            text: AuthConstants.registerBirthDateLabel
+                            font.pointSize: AuthConstants.fieldFontSize
                             font.bold: true
-                            color: "#495057"
+                            color: AuthConstants.textColor
                         }
 
                         RowLayout {
                             Layout.fillWidth: true
-                            spacing: 10
+                            spacing: AuthConstants.spacing / 2
+                            Layout.alignment: Qt.AlignHCenter
 
-                            ComboBox {
+                            CustomComboBox {
                                 id: monthComboBox
-                                Layout.preferredWidth: 120
-                                height: 40
+                                Layout.preferredWidth: 140
+                                Layout.preferredHeight: AuthConstants.fieldHeight
                                 model: ["Month", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
                                 currentIndex: 0
-                                font.pointSize: 12
+                                font.pointSize: AuthConstants.fieldFontSize
+                                backgroundColor: AuthConstants.lightGrayColor
+                                focusColor: AuthConstants.focusColor
+                                textColor: AuthConstants.textColor
+                                borderColor: AuthConstants.borderColor
+                                popupBackgroundColor: AuthConstants.whiteColor
+                                highlightColor: AuthConstants.primaryColor
+                                borderRadius: AuthConstants.borderRadius
+                                textMargins: AuthConstants.margins
+                                fieldHeight: AuthConstants.fieldHeight
                             }
 
-                            ComboBox {
+                            CustomComboBox {
                                 id: dayComboBox
-                                Layout.preferredWidth: 80
-                                height: 40
+                                Layout.preferredWidth: 100
+                                Layout.preferredHeight: AuthConstants.fieldHeight
                                 model: {
                                     var days = ["Day"];
                                     for (var i = 1; i <= 31; i++) {
@@ -219,13 +230,22 @@ Item {
                                     return days;
                                 }
                                 currentIndex: 0
-                                font.pointSize: 12
+                                font.pointSize: AuthConstants.fieldFontSize
+                                backgroundColor: AuthConstants.lightGrayColor
+                                focusColor: AuthConstants.focusColor
+                                textColor: AuthConstants.textColor
+                                borderColor: AuthConstants.borderColor
+                                popupBackgroundColor: AuthConstants.whiteColor
+                                highlightColor: AuthConstants.primaryColor
+                                borderRadius: AuthConstants.borderRadius
+                                textMargins: AuthConstants.margins
+                                fieldHeight: AuthConstants.fieldHeight
                             }
 
-                            ComboBox {
+                            CustomComboBox {
                                 id: yearComboBox
-                                Layout.preferredWidth: 100
-                                height: 40
+                                Layout.preferredWidth: 120
+                                Layout.preferredHeight: AuthConstants.fieldHeight
                                 model: {
                                     var years = ["Year"];
                                     var currentYear = new Date().getFullYear();
@@ -235,30 +255,38 @@ Item {
                                     return years;
                                 }
                                 currentIndex: 0
-                                font.pointSize: 12
+                                font.pointSize: AuthConstants.fieldFontSize
+                                backgroundColor: AuthConstants.lightGrayColor
+                                focusColor: AuthConstants.focusColor
+                                textColor: AuthConstants.textColor
+                                borderColor: AuthConstants.borderColor
+                                popupBackgroundColor: AuthConstants.whiteColor
+                                highlightColor: AuthConstants.primaryColor
+                                borderRadius: AuthConstants.borderRadius
+                                textMargins: AuthConstants.margins
+                                fieldHeight: AuthConstants.fieldHeight
                             }
 
                             // Calendar icon
                             Rectangle {
-                                width: 40
-                                height: 40
-                                color: "#f8f9fa"
-                                border.color: "#ced4da"
+                                Layout.preferredWidth: AuthConstants.fieldHeight
+                                Layout.preferredHeight: AuthConstants.fieldHeight
+                                color: AuthConstants.lightBackgroundColor
+                                border.color: AuthConstants.borderColor
                                 border.width: 1
-                                radius: 4
+                                radius: AuthConstants.borderRadius
 
-                                Text {
+                                Image {
                                     anchors.centerIn: parent
-                                    text: "📅"
-                                    font.pointSize: 16
+                                    source: "qrc:/Assets/calendar.png"
+                                    width: 24
+                                    height: 24
                                 }
 
                                 MouseArea {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        console.log("Calendar clicked");
-                                    }
+                                    onClicked: console.log("Calendar clicked")
                                 }
                             }
 
@@ -269,51 +297,46 @@ Item {
                     }
 
                     // Register Button
-                    Rectangle {
+                    CustomButton {
                         Layout.fillWidth: true
-                        Layout.topMargin: 20
-                        height: 50
-                        color: "#28a745"
-                        radius: 5
-
-                        Text {
-                            anchors.centerIn: parent
-                            text: "Register"
-                            color: "white"
-                            font.pointSize: 16
-                            font.bold: true
-                        }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: registerUser()
-                            onPressed: parent.color = "#218838"
-                            onReleased: parent.color = "#28a745"
+                        Layout.topMargin: AuthConstants.registerSpacing
+                        text: AuthConstants.registerButtonText
+                        backgroundColor: AuthConstants.primaryColor
+                        hoverColor: AuthConstants.primaryHoverColor
+                        pressedColor: AuthConstants.primaryPressedColor
+                        onClicked: {
+                            var dob = RegisterHelper.formatDateOfBirth(monthComboBox.currentIndex, dayComboBox.currentIndex, yearComboBox.currentIndex, yearComboBox.model);
+                            var name = RegisterHelper.getFullName(firstNameField.text, lastNameField.text);
+                            if (name === "" || emailField.text === "" || passwordField.text === "" || dob === "") {
+                                messageLabel.text = "Please fill in all fields";
+                                messageLabel.color = AuthConstants.errorColor;
+                                return;
+                            }
+                            authController.registerUser(emailField.text, passwordField.text, name, dob);
                         }
                     }
 
                     // Back to Login link
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
-                        Layout.topMargin: 10
-                        width: childrenRect.width
-                        height: childrenRect.height
+                        Layout.topMargin: AuthConstants.registerSpacing / 2
+                        Layout.preferredWidth: childrenRect.width
+                        Layout.preferredHeight: childrenRect.height
                         color: "transparent"
 
                         Text {
-                            text: "Already have an account? Login"
-                            font.pointSize: 12
-                            color: "#007bff"
+                            text: AuthConstants.registerLoginLink
+                            font.pointSize: AuthConstants.linkFontSize
+                            color: AuthConstants.primaryColor
                             font.bold: true
 
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: navigateToLogin()
-
-                                onEntered: parent.color = "#0056b3"
-                                onExited: parent.color = "#007bff"
+                                hoverEnabled: true
+                                onClicked: NavigationManager.navigateTo("qrc:/View/Authentication/LoginView.qml")
+                                onEntered: parent.color = AuthConstants.primaryHoverColor
+                                onExited: parent.color = AuthConstants.primaryColor
                             }
                         }
                     }
@@ -322,8 +345,8 @@ Item {
                     Label {
                         id: messageLabel
                         text: ""
-                        font.pointSize: 12
-                        color: "#dc3545"
+                        font.pointSize: AuthConstants.messageFontSize
+                        color: AuthConstants.errorColor
                         horizontalAlignment: Text.AlignHCenter
                         Layout.alignment: Qt.AlignHCenter
                         Layout.fillWidth: true
@@ -334,18 +357,17 @@ Item {
         }
     }
 
-    // You can connect to your auth controller here
+    // Auth connections
     Connections {
-        target: authController // if you have one
-
-        function onRegisterSuccessed(message) {
-            messageLabel.text = "Registration successful!";
-            messageLabel.color = "#28a745";
+        target: authController
+        function onRegisterSuccess(message) {
+            messageLabel.text = AuthConstants.registerSuccessMessage;
+            messageLabel.color = AuthConstants.successColor;
         }
 
         function onRegisterFailed(message) {
-            messageLabel.text = message || "Registration failed!";
-            messageLabel.color = "#dc3545";
+            messageLabel.text = message || AuthConstants.registerFailedMessage;
+            messageLabel.color = AuthConstants.errorColor;
         }
     }
 }

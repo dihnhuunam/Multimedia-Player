@@ -5,10 +5,8 @@ import "Helper"
 
 ApplicationWindow {
     id: root
-    width: 1400
-    height: 900
-    minimumWidth: 1400
-    minimumHeight: 900
+    width: 1280
+    height: 800
     visible: true
     title: "Media Player"
 

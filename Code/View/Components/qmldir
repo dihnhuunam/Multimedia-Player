@@ -1,0 +1,4 @@
+module Components
+CustomTextField 1.0 CustomTextField.qml
+CustomButton 1.0 CustomButton.qml
+CustomComboBox 1.0 CustomComboBox.qml

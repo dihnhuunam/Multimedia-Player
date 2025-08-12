@@ -1,12 +1,15 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QQuickStyle>
 #include "AuthController.hpp"
 
 int main(int argc, char *argv[])
 {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
+    // QQuickStyle::setStyle("Material");
+    QQuickStyle::setStyle("Basic");
 
     // Init AppState and API Service
     AppState *appState = AppState::instance();

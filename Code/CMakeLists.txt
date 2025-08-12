@@ -22,6 +22,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Quick
     Gui
     Qml
+    QuickControls2
 )
 
 target_link_libraries(${PROJECT_NAME} 
@@ -29,6 +30,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Quick
         Qt6::Gui
         Qt6::Qml
+        Qt6::QuickControls2
         Controller
 )
 
