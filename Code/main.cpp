@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
     // Init AppState and API Service
     AppState *appState = AppState::instance();
     APIFactory *api = new APIFactory("http://localhost:3000/api");
-    
+
     // AuthController
     AuthService *authService = new AuthService(api);
     UserModel *userModel = new UserModel();

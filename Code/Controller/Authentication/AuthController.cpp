@@ -61,12 +61,11 @@ void AuthController::onRegisterFinished(bool success, const UserData &userData)
 {
     if (success)
     {
-        // Lưu vào AppState nếu có user
         if (!userData.user.isEmpty())
         {
             // Save to local
             appState->saveUserInfo(userData.user);
-        
+
             // Save to UserModel
             QString email = userData.user.value("email").toString();
             QString name = userData.user.value("name").toString();
@@ -94,7 +93,7 @@ void AuthController::onChangePasswordFinished(bool success, const UserData &user
         {
             // Save to local
             appState->saveUserInfo(userData.user);
-            
+
             // Save to UserModel
             QString email = userData.user.value("email").toString();
             QString name = userData.user.value("name").toString();
