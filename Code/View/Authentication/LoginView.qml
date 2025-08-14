@@ -3,18 +3,14 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import "../Helper"
 import "../Components"
-import "./AuthConstants.js" as AuthConstants
+import "./AuthStyles.js" as AuthStyles
 
 Item {
     id: root
 
-    // Properties
-    property alias username: usernameField.text
-    property alias password: passwordField.text
-
     Rectangle {
         anchors.fill: parent
-        color: AuthConstants.lightBackgroundColor
+        color: AuthStyles.lightBackgroundColor
 
         // MouseArea to remove focus of TextField
         MouseArea {
@@ -29,21 +25,21 @@ Item {
             // Left Panel - Login Form
             Rectangle {
                 id: leftPanel
-                width: parent.width * AuthConstants.loginLeftPanelWidth
+                width: parent.width * AuthStyles.loginLeftPanelWidth
                 height: parent.height
-                color: AuthConstants.whiteColor
+                color: AuthStyles.whiteColor
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    width: AuthConstants.loginFormWidth
-                    spacing: AuthConstants.spacing
+                    width: AuthStyles.loginFormWidth
+                    spacing: AuthStyles.spacing
 
                     // Title
                     Text {
-                        text: AuthConstants.loginTitle
-                        font.pointSize: AuthConstants.loginTitleFontSize
+                        text: AuthStyles.loginTitle
+                        font.pointSize: AuthStyles.loginTitleFontSize
                         font.bold: true
-                        color: AuthConstants.darkTextColor
+                        color: AuthStyles.darkTextColor
                         Layout.alignment: Qt.AlignHCenter
                     }
 
@@ -51,14 +47,14 @@ Item {
                     CustomTextField {
                         id: usernameField
                         Layout.fillWidth: true
-                        placeholderText: AuthConstants.loginUsernamePlaceholder
+                        placeholderText: AuthStyles.loginUsernamePlaceholder
                     }
 
                     // Password field
                     CustomTextField {
                         id: passwordField
                         Layout.fillWidth: true
-                        placeholderText: AuthConstants.loginPasswordPlaceholder
+                        placeholderText: AuthStyles.loginPasswordPlaceholder
                         echoMode: TextInput.Password
                         onAccepted: authController.loginUser(usernameField.text, passwordField.text)
                     }
@@ -66,10 +62,10 @@ Item {
                     // Sign In Button
                     CustomButton {
                         Layout.fillWidth: true
-                        text: AuthConstants.loginButtonText
-                        backgroundColor: AuthConstants.primaryColor
-                        hoverColor: AuthConstants.primaryHoverColor
-                        pressedColor: AuthConstants.primaryPressedColor
+                        text: AuthStyles.loginButtonText
+                        backgroundColor: AuthStyles.primaryColor
+                        hoverColor: AuthStyles.primaryHoverColor
+                        pressedColor: AuthStyles.primaryPressedColor
                         onClicked: authController.loginUser(usernameField.text, passwordField.text)
                     }
 
@@ -77,8 +73,8 @@ Item {
                     Label {
                         id: messageLabel
                         text: ""
-                        font.pointSize: AuthConstants.messageFontSize
-                        color: AuthConstants.errorColor
+                        font.pointSize: AuthStyles.messageFontSize
+                        color: AuthStyles.errorColor
                         horizontalAlignment: Text.AlignHCenter
                         Layout.alignment: Qt.AlignHCenter
                         Layout.fillWidth: true
@@ -90,32 +86,32 @@ Item {
             // Right Panel - Welcome
             Rectangle {
                 id: rightPanel
-                width: parent.width * AuthConstants.loginRightPanelWidth
+                width: parent.width * AuthStyles.loginRightPanelWidth
                 height: parent.height
-                color: AuthConstants.primaryColor
+                color: AuthStyles.primaryColor
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    width: parent.width * AuthConstants.loginWelcomePanelContentWidth
-                    spacing: AuthConstants.welcomeSpacing
+                    width: parent.width * AuthStyles.loginWelcomePanelContentWidth
+                    spacing: AuthStyles.welcomeSpacing
 
                     Text {
-                        text: AuthConstants.loginWelcomeTitle
-                        font.pointSize: AuthConstants.welcomeTitleFontSize
+                        text: AuthStyles.loginWelcomeTitle
+                        font.pointSize: AuthStyles.welcomeTitleFontSize
                         font.bold: true
-                        color: AuthConstants.whiteColor
+                        color: AuthStyles.whiteColor
                         Layout.alignment: Qt.AlignHCenter
                     }
 
                     Text {
-                        text: AuthConstants.loginWelcomeMessage
-                        font.pointSize: AuthConstants.welcomeTextFontSize
-                        color: AuthConstants.whiteColor
+                        text: AuthStyles.loginWelcomeMessage
+                        font.pointSize: AuthStyles.welcomeTextFontSize
+                        color: AuthStyles.whiteColor
                         wrapMode: Text.WordWrap
                         horizontalAlignment: Text.AlignHCenter
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter
-                        lineHeight: AuthConstants.lineHeight
+                        lineHeight: AuthStyles.lineHeight
                     }
 
                     // Register Link
@@ -127,9 +123,9 @@ Item {
                         color: "transparent"
 
                         Text {
-                            text: AuthConstants.loginRegisterLink
-                            font.pointSize: AuthConstants.linkFontSize
-                            color: AuthConstants.whiteColor
+                            text: AuthStyles.loginRegisterLink
+                            font.pointSize: AuthStyles.linkFontSize
+                            color: AuthStyles.whiteColor
                             font.bold: true
 
                             MouseArea {
@@ -137,8 +133,8 @@ Item {
                                 cursorShape: Qt.PointingHandCursor
                                 hoverEnabled: true
                                 onClicked: NavigationManager.navigateTo("qrc:/View/Authentication/RegisterView.qml")
-                                onEntered: parent.color = AuthConstants.lightGrayColor
-                                onExited: parent.color = AuthConstants.whiteColor
+                                onEntered: parent.color = AuthStyles.lightGrayColor
+                                onExited: parent.color = AuthStyles.whiteColor
                                 propagateComposedEvents: false
                             }
                         }
@@ -154,13 +150,14 @@ Item {
 
         function onLoginSuccess(message) {
             console.log(message);
-            messageLabel.text = AuthConstants.loginSuccessMessage;
-            messageLabel.color = AuthConstants.successColor;
+            messageLabel.text = AuthStyles.loginSuccessMessage;
+            messageLabel.color = AuthStyles.successColor;
+            NavigationManager.navigateTo("qrc:/View/Profile/ProfileView.qml");
         }
 
         function onLoginFailed(message) {
-            messageLabel.text = message || AuthConstants.loginFailedMessage;
-            messageLabel.color = AuthConstants.errorColor;
+            messageLabel.text = message || AuthStyles.loginFailedMessage;
+            messageLabel.color = AuthStyles.errorColor;
         }
     }
 }
