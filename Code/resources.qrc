@@ -4,16 +4,21 @@
         
         <file>View/Authentication/LoginView.qml</file>
         <file>View/Authentication/RegisterView.qml</file>
-        <file>View/Authentication/AuthConstants.js</file>
+        <file>View/Authentication/AuthStyles.js</file>
+
+        <file>View/Profile/ProfileView.qml</file>
+        <file>View/Profile/ProfileStyles.js</file>
         
-        <file>View/Helper/NavigationManager.qml</file>
-        <file>View/Helper/RegisterHelper.js</file>
+        <file>View/Helpers/NavigationManager.qml</file>
+        <file>View/Helpers/RegisterHelper.js</file>
         
         <file>View/Components/CustomButton.qml</file>
         <file>View/Components/CustomTextField.qml</file>
         <file>View/Components/CustomComboBox.qml</file>
+        <file>View/Components/CustomText.qml</file>
         <file>View/Components/qmldir</file>
 
         <file>Assets/calendar.png</file>
+        <file>Assets/edit.png</file>
     </qresource>
 </RCC>

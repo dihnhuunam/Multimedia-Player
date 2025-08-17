@@ -1,12 +1,14 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Window
-import "Helper"
+import "./Helpers"
 
 ApplicationWindow {
     id: root
     width: 1280
     height: 800
+    // minimumWidth: 800
+    // minimumHeight: 400
     visible: true
     title: "Media Player"
 

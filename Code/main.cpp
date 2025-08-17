@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("userModel", userModel);
 
     engine.addImportPath("qrc:/");
-    qmlRegisterSingletonType(QUrl("qrc:/View/Helper/NavigationManager.qml"), "NavigationManager", 1, 0, "NavigationManager");
+    qmlRegisterSingletonType(QUrl("qrc:/View/Helpers/NavigationManager.qml"), "NavigationManager", 1, 0, "NavigationManager");
 
     const QUrl url("qrc:/View/Main.qml");
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreated, &app, [url](QObject *obj, const QUrl &objUrl)

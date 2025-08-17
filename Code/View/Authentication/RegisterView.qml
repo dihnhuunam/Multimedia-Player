@@ -1,10 +1,10 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../Helper"
+import "../Helpers"
 import "../Components"
 import "./AuthStyles.js" as AuthStyles
-import "../Helper/RegisterHelper.js" as RegisterHelper
+import "../Helpers/RegisterHelper.js" as RegisterHelper
 
 Item {
     id: root

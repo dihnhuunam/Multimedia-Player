@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import "../Helper"
+import "../Helpers"
 import "../Components"
 import "./AuthStyles.js" as AuthStyles
 
