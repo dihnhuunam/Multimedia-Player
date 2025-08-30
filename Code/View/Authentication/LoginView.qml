@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import "../Helpers"
-import "../Components"
 import "./AuthStyles.js" as AuthStyles
 
 Item {
@@ -44,28 +43,79 @@ Item {
                     }
 
                     // Username field
-                    CustomTextField {
+                    TextField {
                         id: usernameField
                         Layout.fillWidth: true
                         placeholderText: AuthStyles.loginUsernamePlaceholder
+                        font.pointSize: AuthStyles.fieldFontSize
+                        color: AuthStyles.textColor
+                        background: Rectangle {
+                            color: AuthStyles.lightGrayColor
+                            radius: AuthStyles.borderRadius
+                            border.color: AuthStyles.borderColor
+                            border.width: 1
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        anchors.margins: AuthStyles.margins
+                        height: AuthStyles.fieldHeight
+                        verticalAlignment: Text.AlignVCenter
+                        onActiveFocusChanged: {
+                            background.color = activeFocus ? AuthStyles.focusColor : AuthStyles.lightGrayColor
+                        }
                     }
 
                     // Password field
-                    CustomTextField {
+                    TextField {
                         id: passwordField
                         Layout.fillWidth: true
                         placeholderText: AuthStyles.loginPasswordPlaceholder
                         echoMode: TextInput.Password
+                        font.pointSize: AuthStyles.fieldFontSize
+                        color: AuthStyles.textColor
+                        background: Rectangle {
+                            color: AuthStyles.lightGrayColor
+                            radius: AuthStyles.borderRadius
+                            border.color: AuthStyles.borderColor
+                            border.width: 1
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        anchors.margins: AuthStyles.margins
+                        height: AuthStyles.fieldHeight
+                        verticalAlignment: Text.AlignVCenter
+                        onActiveFocusChanged: {
+                            background.color = activeFocus ? AuthStyles.focusColor : AuthStyles.lightGrayColor
+                        }
                         onAccepted: authController.loginUser(usernameField.text, passwordField.text)
                     }
 
                     // Sign In Button
-                    CustomButton {
+                    Button {
+                        id: signInButton
                         Layout.fillWidth: true
                         text: AuthStyles.loginButtonText
-                        backgroundColor: AuthStyles.primaryColor
-                        hoverColor: AuthStyles.primaryHoverColor
-                        pressedColor: AuthStyles.primaryPressedColor
+                        contentItem: Text {
+                            text: signInButton.text
+                            font.pointSize: AuthStyles.buttonFontSize
+                            font.bold: true
+                            color: AuthStyles.whiteColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: signInButton.down ? AuthStyles.primaryPressedColor :
+                                   signInButton.hovered ? AuthStyles.primaryHoverColor :
+                                   AuthStyles.primaryColor
+                            radius: AuthStyles.borderRadius
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        height: AuthStyles.fieldHeight
+                        enabled: true
                         onClicked: authController.loginUser(usernameField.text, passwordField.text)
                     }
 
