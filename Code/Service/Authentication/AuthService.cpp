@@ -252,20 +252,20 @@ void AuthService::onLoginReply()
         {
             QJsonObject obj = doc.object();
             userData.message = obj["message"].toString();
-            if (obj.contains("token") && obj.contains("user"))
+            if (obj.contains("user") && obj.contains("token"))
             {
-                userData.token = obj["token"].toString();
                 QJsonObject userObj = obj["user"].toObject();
                 userData.email = userObj["email"].toString();
                 userData.name = userObj["name"].toString();
                 userData.dob = userObj["dateOfBirth"].toString();
                 userData.role = userObj["role"].toString();
                 userData.id = userObj.contains("id") ? userObj["id"].toInt() : -1;
+                userData.token = obj["token"].toString();
                 success = true;
             }
             else
             {
-                userData.message = "Invalid login response from server";
+                userData.message = "Invalid response from server";
             }
         }
         else
@@ -350,14 +350,8 @@ void AuthService::onRegisterReply()
         {
             QJsonObject obj = doc.object();
             userData.message = obj["message"].toString();
-            if (obj.contains("user"))
+            if (!userData.message.isEmpty())
             {
-                QJsonObject userObj = obj["user"].toObject();
-                userData.email = userObj["email"].toString();
-                userData.name = userObj["name"].toString();
-                userData.dob = userObj["dateOfBirth"].toString();
-                userData.role = userObj["role"].toString();
-                userData.id = userObj.contains("id") ? userObj["id"].toInt() : -1;
                 success = true;
             }
             else

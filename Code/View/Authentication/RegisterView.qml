@@ -616,6 +616,7 @@ Item {
         function onRegisterSuccess(message) {
             messageLabel.text = AuthStyles.registerSuccessMessage;
             messageLabel.color = AuthStyles.successColor;
+            NavigationManager.navigateTo("qrc:/View/Authentication/LoginView.qml")
         }
 
         function onRegisterFailed(message) {
