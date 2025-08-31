@@ -15,24 +15,46 @@ void RESTful::initializeEndpoints()
     m_endpoints["login"] = "/auth/login";
     m_endpoints["register"] = "/auth/register";
     m_endpoints["users"] = "/auth/users";
+    m_endpoints["users/{id}"] = "/auth/users/%1";
 }
 
 QNetworkRequest RESTful::createRequest(const QString &endpointKey, const QString &token)
 {
-    // Get corresponding enpoint
+    // Get corresponding endpoint (direct lookup first)
     QString endpoint = m_endpoints.value(endpointKey, "");
-    if (endpoint.isEmpty())
+    QString formattedEndpoint;
+
+    if (!endpoint.isEmpty())
+    {
+        // Direct match (static endpoint)
+        formattedEndpoint = endpoint;
+    }
+    else
+    {
+        // Handle dynamic endpoints (e.g., "users/3")
+        QStringList parts = endpointKey.split("/");
+        if (parts.size() == 2 && parts[0] == "users")
+        {
+            QString dynamicKey = "users/{id}";
+            endpoint = m_endpoints.value(dynamicKey, "");
+            if (!endpoint.isEmpty())
+            {
+                formattedEndpoint = endpoint.arg(parts[1]); // Substitute ID into %1
+            }
+        }
+    }
+
+    if (formattedEndpoint.isEmpty())
     {
         qDebug() << Q_FUNC_INFO << ": Endpoint key not found: " << endpointKey;
         return QNetworkRequest();
     }
 
     // Create request
-    QUrl url(m_baseURL + endpoint);
+    QUrl url(m_baseURL + formattedEndpoint);
     qDebug() << url;
     QNetworkRequest request(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/json");
-    // Check the existence of token
     if (!token.isEmpty())
     {
         request.setRawHeader("Authorization", "Bearer " + token.toUtf8());

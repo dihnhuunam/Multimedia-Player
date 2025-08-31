@@ -3,6 +3,7 @@
 #include <QQmlContext>
 #include <QQuickStyle>
 #include "AuthController.hpp"
+#include "ProfileController.hpp"
 
 int main(int argc, char *argv[])
 {
@@ -19,8 +20,10 @@ int main(int argc, char *argv[])
     AuthService *authService = new AuthService(api);
     UserModel *userModel = new UserModel();
     AuthController *authController = new AuthController(authService, appState, userModel);
+    ProfileController *profileController = new ProfileController(authService, appState, userModel);
 
     engine.rootContext()->setContextProperty("authController", authController);
+    engine.rootContext()->setContextProperty("profileController", profileController);
     engine.rootContext()->setContextProperty("userModel", userModel);
 
     engine.addImportPath("qrc:/");

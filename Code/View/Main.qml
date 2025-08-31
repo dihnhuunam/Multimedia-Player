@@ -7,8 +7,8 @@ ApplicationWindow {
     id: root
     width: 1280
     height: 800
-    // minimumWidth: 800
-    // minimumHeight: 400
+    minimumWidth: 800
+    minimumHeight: 600
     visible: true
     title: "Media Player"
 

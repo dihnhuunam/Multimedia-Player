@@ -1,5 +1,6 @@
 #pragma once
 #include "APIFactory.hpp"
+#include "AppState.hpp"
 #include "UserData.hpp"
 #include <QObject>
 #include <QJsonObject>
@@ -19,12 +20,17 @@ signals:
     void loginFinished(bool success, const UserData &userData);
     void registerFinished(bool success, const UserData &userData);
     void changePasswordFinished(bool success, const UserData &userData);
+    void changeNameFinished(bool success, const UserData &userData);
+    void changeDobFinished(bool success, const UserData &userData);
 
 private slots:
     void onLoginReply();
     void onRegisterReply();
     void onChangePasswordReply();
+    void onChangeNameReply();
+    void onChangeDobReply();
 
 private:
     RESTful *m_restful;
+    AppState *m_appState;
 };

@@ -10,6 +10,61 @@ Item {
     // Properties to manage popup state
     property string currentField: "" // "name", "email", or "dob"
     property string currentValue: ""
+    property bool isLoading: false
+    
+    // Add user ID property for easier access
+    property int userId: userModel ? userModel.id || 0 : 0
+
+    // Connect to ProfileController signals
+    Component.onCompleted: {
+        profileController.changeNameSuccess.connect(onChangeNameSuccess)
+        profileController.changeNameFailed.connect(onChangeNameFailed)
+        profileController.changeDobSuccess.connect(onChangeDobSuccess)
+        profileController.changeDobFailed.connect(onChangeDobFailed)
+        profileController.changePasswordSuccess.connect(onChangePasswordSuccess)
+        profileController.changePasswordFailed.connect(onChangePasswordFailed)
+        console.log(userId)
+        console.log(userModel.id)
+    }
+
+    // Signal handlers
+    function onChangeNameSuccess(message) {
+        root.isLoading = false
+        showMessage(message, true)
+        editPopup.close()
+    }
+
+    function onChangeNameFailed(message) {
+        root.isLoading = false
+        showMessage(message, false)
+    }
+
+    function onChangeDobSuccess(message) {
+        root.isLoading = false
+        showMessage(message, true)
+    }
+
+    function onChangeDobFailed(message) {
+        root.isLoading = false
+        showMessage(message, false)
+    }
+
+    function onChangePasswordSuccess(message) {
+        root.isLoading = false
+        showMessage(message, true)
+        passwordPopup.close()
+    }
+
+    function onChangePasswordFailed(message) {
+        root.isLoading = false
+        showMessage(message, false)
+    }
+
+    function showMessage(message, isSuccess) {
+        messageText.text = message
+        messageText.color = isSuccess ? ProfileStyles.successColor : ProfileStyles.errorColor
+        messageTimer.start()
+    }
 
     Rectangle {
         anchors.fill: parent
@@ -24,6 +79,24 @@ Item {
             anchors.centerIn: parent
             width: ProfileStyles.profileFormWidth
             spacing: ProfileStyles.profileSpacing
+
+            // Message display
+            Text {
+                id: messageText
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                font.pointSize: ProfileStyles.fieldFontSize
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                visible: text.length > 0
+                wrapMode: Text.Wrap
+            }
+
+            Timer {
+                id: messageTimer
+                interval: 3000
+                onTriggered: messageText.text = ""
+            }
 
             // Logo and Title
             ColumnLayout {
@@ -70,7 +143,7 @@ Item {
                     anchors.margins: ProfileStyles.margins
                     spacing: ProfileStyles.profileSpacing
 
-                    // Email Address
+                    // Email Address (Read-only display)
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: ProfileStyles.spacing / 2
@@ -85,14 +158,10 @@ Item {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: ProfileStyles.fieldHeight
-                            color: mouseArea.containsMouse ? ProfileStyles.focusColor : ProfileStyles.lightGrayColor
+                            color: ProfileStyles.lightGrayColor
                             radius: ProfileStyles.borderRadius
                             border.color: ProfileStyles.borderColor
                             border.width: 1
-
-                            Behavior on color {
-                                ColorAnimation { duration: 150 }
-                            }
 
                             Text {
                                 anchors.fill: parent
@@ -102,18 +171,6 @@ Item {
                                 color: ProfileStyles.textColor
                                 verticalAlignment: Text.AlignVCenter
                                 wrapMode: Text.Wrap
-                            }
-
-                            MouseArea {
-                                id: mouseArea
-                                anchors.fill: parent
-                                hoverEnabled: true
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    root.currentField = "email";
-                                    root.currentValue = userModel.email;
-                                    editPopup.open();
-                                }
                             }
                         }
                     }
@@ -480,6 +537,36 @@ Item {
                         }
                     }
 
+                    // Change Password Button
+                    Button {
+                        id: changePasswordButton
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        text: "Change Password"
+                        enabled: !isLoading
+                        
+                        contentItem: Text {
+                            text: changePasswordButton.text
+                            font.pointSize: ProfileStyles.fieldFontSize
+                            font.bold: true
+                            color: ProfileStyles.whiteColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        
+                        background: Rectangle {
+                            color: changePasswordButton.down ? ProfileStyles.primaryPressedColor :
+                                   changePasswordButton.hovered ? ProfileStyles.primaryHoverColor :
+                                   ProfileStyles.primaryColor
+                            radius: ProfileStyles.borderRadius
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        
+                        onClicked: passwordPopup.open()
+                    }
+
                     // Back to Home link
                     Rectangle {
                         Layout.alignment: Qt.AlignHCenter
@@ -519,14 +606,20 @@ Item {
             var selectedDay = parseInt(dayComboBox.currentText);
             var selectedYear = parseInt(yearComboBox.currentText);
             
-            var newDate = new Date(selectedYear, selectedMonth - 1, selectedDay);
-            console.log("Updating date:", newDate);
+            // Format date as ISO string (YYYY-MM-DD)
+            var formattedDate = selectedYear + "-" + 
+                               (selectedMonth < 10 ? "0" : "") + selectedMonth + "-" +
+                               (selectedDay < 10 ? "0" : "") + selectedDay;
             
-            userModel.dateOfBirth = newDate;
+            console.log("Updating date:", formattedDate);
+            root.isLoading = true;
+            
+            // Call ProfileController to update DOB on server
+            profileController.changeDob(root.userId, formattedDate);
         }
     }
 
-    // Popup for editing Name and Email
+    // Popup for editing Name
     Popup {
         id: editPopup
         anchors.centerIn: parent
@@ -535,7 +628,7 @@ Item {
         modal: true
         focus: true
         closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        visible: root.currentField === "name" || root.currentField === "email"
+        visible: root.currentField === "name"
 
         Rectangle {
             anchors.fill: parent
@@ -550,7 +643,7 @@ Item {
                 spacing: ProfileStyles.profileSpacing
 
                 Text {
-                    text: "Edit " + (root.currentField === "name" ? ProfileStyles.profileNameLabel : ProfileStyles.profileEmailLabel)
+                    text: "Edit " + ProfileStyles.profileNameLabel
                     font.pointSize: ProfileStyles.fieldFontSize
                     font.bold: true
                     color: ProfileStyles.textColor
@@ -575,9 +668,6 @@ Item {
                     }
                     leftPadding: ProfileStyles.margins
                     verticalAlignment: Text.AlignVCenter
-                    validator: RegularExpressionValidator {
-                        regularExpression: root.currentField === "email" ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/ : /.*/
-                    }
                 }
 
                 RowLayout {
@@ -589,6 +679,8 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: ProfileStyles.fieldHeight
                         text: "Save Changes"
+                        enabled: !root.isLoading && editTextField.text.trim().length > 0
+                        
                         contentItem: Text {
                             text: saveButton.text
                             font.pointSize: ProfileStyles.fieldFontSize
@@ -602,17 +694,16 @@ Item {
                                    saveButton.hovered ? ProfileStyles.primaryHoverColor :
                                    ProfileStyles.primaryColor
                             radius: ProfileStyles.borderRadius
+                            opacity: saveButton.enabled ? 1.0 : 0.5
                             Behavior on color {
                                 ColorAnimation { duration: 150 }
                             }
                         }
                         onClicked: {
-                            if (root.currentField === "name") {
-                                userModel.name = editTextField.text;
-                            } else if (root.currentField === "email") {
-                                userModel.email = editTextField.text;
+                            if (editTextField.text.trim().length > 0) {
+                                root.isLoading = true;
+                                profileController.changeName(root.userId, editTextField.text.trim());
                             }
-                            editPopup.close();
                         }
                     }
 
@@ -621,6 +712,8 @@ Item {
                         Layout.fillWidth: true
                         Layout.preferredHeight: ProfileStyles.fieldHeight
                         text: "Cancel"
+                        enabled: !root.isLoading
+                        
                         contentItem: Text {
                             text: cancelButton.text
                             font.pointSize: ProfileStyles.fieldFontSize
@@ -634,6 +727,7 @@ Item {
                                    cancelButton.hovered ? ProfileStyles.focusColor :
                                    ProfileStyles.lightGrayColor
                             radius: ProfileStyles.borderRadius
+                            opacity: cancelButton.enabled ? 1.0 : 0.5
                             Behavior on color {
                                 ColorAnimation { duration: 150 }
                             }
@@ -642,6 +736,252 @@ Item {
                             editPopup.close();
                         }
                     }
+                }
+            }
+        }
+    }
+
+    // Password Change Popup
+    Popup {
+        id: passwordPopup
+        anchors.centerIn: parent
+        width: ProfileStyles.editPopUpFormWidth
+        height: ProfileStyles.editPopUpFormHeight + 230
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+        Rectangle {
+            anchors.fill: parent
+            color: ProfileStyles.whiteColor
+            radius: ProfileStyles.borderRadius
+            border.color: ProfileStyles.borderColor
+            border.width: 1
+
+            ColumnLayout {
+                anchors.fill: parent
+                anchors.margins: ProfileStyles.margins
+                spacing: ProfileStyles.profileSpacing
+
+                Text {
+                    text: "Change Password"
+                    font.pointSize: ProfileStyles.fieldFontSize
+                    font.bold: true
+                    color: ProfileStyles.textColor
+                    Layout.alignment: Qt.AlignHCenter
+                }
+
+                // Current Password
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: ProfileStyles.spacing / 2
+
+                    Text {
+                        text: "Current Password"
+                        font.pointSize: ProfileStyles.fieldFontSize - 1
+                        color: ProfileStyles.textColor
+                    }
+
+                    TextField {
+                        id: currentPasswordField
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        echoMode: TextInput.Password
+                        font.pointSize: ProfileStyles.fieldFontSize
+                        color: ProfileStyles.textColor
+                        background: Rectangle {
+                            color: currentPasswordField.activeFocus ? ProfileStyles.focusColor : ProfileStyles.lightGrayColor
+                            radius: ProfileStyles.borderRadius
+                            border.color: ProfileStyles.borderColor
+                            border.width: 1
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        leftPadding: ProfileStyles.margins
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
+                // New Password
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: ProfileStyles.spacing / 2
+
+                    Text {
+                        text: "New Password"
+                        font.pointSize: ProfileStyles.fieldFontSize - 1
+                        color: ProfileStyles.textColor
+                    }
+
+                    TextField {
+                        id: newPasswordField
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        echoMode: TextInput.Password
+                        font.pointSize: ProfileStyles.fieldFontSize
+                        color: ProfileStyles.textColor
+                        background: Rectangle {
+                            color: newPasswordField.activeFocus ? ProfileStyles.focusColor : ProfileStyles.lightGrayColor
+                            radius: ProfileStyles.borderRadius
+                            border.color: ProfileStyles.borderColor
+                            border.width: 1
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        leftPadding: ProfileStyles.margins
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
+                // Confirm Password
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: ProfileStyles.spacing / 2
+
+                    Text {
+                        text: "Confirm New Password"
+                        font.pointSize: ProfileStyles.fieldFontSize - 1
+                        color: ProfileStyles.textColor
+                    }
+
+                    TextField {
+                        id: confirmPasswordField
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        echoMode: TextInput.Password
+                        font.pointSize: ProfileStyles.fieldFontSize
+                        color: ProfileStyles.textColor
+                        background: Rectangle {
+                            color: confirmPasswordField.activeFocus ? ProfileStyles.focusColor : ProfileStyles.lightGrayColor
+                            radius: ProfileStyles.borderRadius
+                            border.color: ProfileStyles.borderColor
+                            border.width: 1
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        leftPadding: ProfileStyles.margins
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: ProfileStyles.spacing
+
+                    Button {
+                        id: savePasswordButton
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        text: "Change Password"
+                        enabled: !root.isLoading && 
+                                currentPasswordField.text.length > 0 && 
+                                newPasswordField.text.length > 0 && 
+                                confirmPasswordField.text.length > 0 &&
+                                newPasswordField.text === confirmPasswordField.text
+                        
+                        contentItem: Text {
+                            text: savePasswordButton.text
+                            font.pointSize: ProfileStyles.fieldFontSize
+                            font.bold: true
+                            color: ProfileStyles.whiteColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: savePasswordButton.down ? ProfileStyles.primaryPressedColor :
+                                   savePasswordButton.hovered ? ProfileStyles.primaryHoverColor :
+                                   ProfileStyles.primaryColor
+                            radius: ProfileStyles.borderRadius
+                            opacity: savePasswordButton.enabled ? 1.0 : 0.5
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        onClicked: {
+                            if (newPasswordField.text === confirmPasswordField.text) {
+                                root.isLoading = true;
+                                profileController.changePassword(root.userId, currentPasswordField.text, newPasswordField.text);
+                            } else {
+                                showMessage("Passwords do not match", false);
+                            }
+                        }
+                    }
+
+                    Button {
+                        id: cancelPasswordButton
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: ProfileStyles.fieldHeight
+                        text: "Cancel"
+                        enabled: !root.isLoading
+                        
+                        contentItem: Text {
+                            text: cancelPasswordButton.text
+                            font.pointSize: ProfileStyles.fieldFontSize
+                            font.bold: true
+                            color: ProfileStyles.textColor
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        background: Rectangle {
+                            color: cancelPasswordButton.down ? ProfileStyles.lightGrayColor :
+                                   cancelPasswordButton.hovered ? ProfileStyles.focusColor :
+                                   ProfileStyles.lightGrayColor
+                            radius: ProfileStyles.borderRadius
+                            opacity: cancelPasswordButton.enabled ? 1.0 : 0.5
+                            Behavior on color {
+                                ColorAnimation { duration: 150 }
+                            }
+                        }
+                        onClicked: {
+                            currentPasswordField.text = "";
+                            newPasswordField.text = "";
+                            confirmPasswordField.text = "";
+                            passwordPopup.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Loading overlay
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        visible: root.isLoading
+
+        Rectangle {
+            anchors.fill: parent
+            color: "black"
+            opacity: 0.3
+        }
+
+        Rectangle {
+            anchors.centerIn: parent
+            width: 200
+            height: 100
+            color: ProfileStyles.whiteColor
+            radius: ProfileStyles.borderRadius
+            border.color: ProfileStyles.borderColor
+            border.width: 1
+
+            ColumnLayout {
+                anchors.centerIn: parent
+                spacing: ProfileStyles.spacing
+
+                BusyIndicator {
+                    Layout.alignment: Qt.AlignHCenter
+                    running: root.isLoading
+                }
+
+                Text {
+                    text: "Updating..."
+                    font.pointSize: ProfileStyles.fieldFontSize
+                    color: ProfileStyles.textColor
+                    Layout.alignment: Qt.AlignHCenter
                 }
             }
         }

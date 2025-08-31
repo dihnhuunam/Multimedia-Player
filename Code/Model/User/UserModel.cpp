@@ -20,6 +20,11 @@ QDate UserModel::getDateOfBirth() const
     return m_dateOfBirth;
 }
 
+int UserModel::getId() const
+{
+    return m_id;
+}
+
 void UserModel::setEmail(const QString &email)
 {
     if (m_email != email)
@@ -44,5 +49,14 @@ void UserModel::setDateOfBirth(const QDate &dateOfBirth)
     {
         m_dateOfBirth = dateOfBirth;
         emit dateOfBirthChanged();
+    }
+}
+
+void UserModel::setId(const int &id)
+{
+    if (m_id != id)
+    {
+        m_id = id;
+        emit idChanged();
     }
 }

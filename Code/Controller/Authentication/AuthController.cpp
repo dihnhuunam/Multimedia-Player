@@ -11,9 +11,6 @@ AuthController::AuthController(AuthService *authService, AppState *appState, Use
 
     // Handle Register
     connect(authService, &AuthService::registerFinished, this, &AuthController::onRegisterFinished);
-
-    // Handle Change Password
-    connect(authService, &AuthService::changePasswordFinished, this, &AuthController::onChangePasswordFinished);
 }
 
 void AuthController::loginUser(const QString &email, const QString &password)
@@ -24,11 +21,6 @@ void AuthController::loginUser(const QString &email, const QString &password)
 void AuthController::registerUser(const QString &email, const QString &password, const QString &name, const QString &dob)
 {
     authService->registerUser(email, password, name, dob);
-}
-
-void AuthController::changePassword(const int &userId, const QString &oldPassword, const QString &newPassword)
-{
-    authService->changePassword(userId, oldPassword, newPassword);
 }
 
 void AuthController::onLoginFinished(bool success, const UserData &userData)
@@ -44,6 +36,7 @@ void AuthController::onLoginFinished(bool success, const UserData &userData)
         userModel->setEmail(userData.email);
         userModel->setName(userData.name);
         userModel->setDateOfBirth(dateOfBirth);
+        userModel->setId(userData.id);
 
         emit loginSuccess(userData.message);
     }
@@ -65,32 +58,12 @@ void AuthController::onRegisterFinished(bool success, const UserData &userData)
         userModel->setEmail(userData.email);
         userModel->setName(userData.name);
         userModel->setDateOfBirth(dateOfBirth);
+        userModel->setId(userData.id);
 
         emit registerSuccess(userData.message);
     }
     else
     {
         emit registerFailed(userData.message);
-    }
-}
-
-void AuthController::onChangePasswordFinished(bool success, const UserData &userData)
-{
-    if (success)
-    {
-        // Save to local
-        appState->saveUserInfo(userData);
-
-        // Save to UserModel
-        QDate dateOfBirth = userData.dob.isEmpty() ? QDate() : QDate::fromString(userData.dob, Qt::ISODate);
-        userModel->setEmail(userData.email);
-        userModel->setName(userData.name);
-        userModel->setDateOfBirth(dateOfBirth);
-
-        emit changePasswordSuccess(userData.message);
-    }
-    else
-    {
-        emit changePasswordFailed(userData.message);
     }
 }
