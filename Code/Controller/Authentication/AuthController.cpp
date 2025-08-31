@@ -37,16 +37,12 @@ void AuthController::onLoginFinished(bool success, const UserData &userData)
     {
         // Save to local
         appState->saveToken(userData.token);
-        appState->saveUserInfo(userData.user);
+        appState->saveUserInfo(userData);
 
         // Save to UserModel
-        QString email = userData.user.value("email").toString();
-        QString name = userData.user.value("name").toString();
-        QString dob = userData.user.value("dateOfBirth").toString();
-        QDate dateOfBirth = dob.isEmpty() ? QDate() : QDate::fromString(dob, Qt::ISODate);
-
-        userModel->setEmail(email);
-        userModel->setName(name);
+        QDate dateOfBirth = userData.dob.isEmpty() ? QDate() : QDate::fromString(userData.dob, Qt::ISODate);
+        userModel->setEmail(userData.email);
+        userModel->setName(userData.name);
         userModel->setDateOfBirth(dateOfBirth);
 
         emit loginSuccess(userData.message);
@@ -61,21 +57,14 @@ void AuthController::onRegisterFinished(bool success, const UserData &userData)
 {
     if (success)
     {
-        if (!userData.user.isEmpty())
-        {
-            // Save to local
-            appState->saveUserInfo(userData.user);
+        // Save to local
+        appState->saveUserInfo(userData);
 
-            // Save to UserModel
-            QString email = userData.user.value("email").toString();
-            QString name = userData.user.value("name").toString();
-            QString dob = userData.user.value("dateOfBirth").toString();
-            QDate dateOfBirth = dob.isEmpty() ? QDate() : QDate::fromString(dob, Qt::ISODate);
-
-            userModel->setEmail(email);
-            userModel->setName(name);
-            userModel->setDateOfBirth(dateOfBirth);
-        }
+        // Save to UserModel
+        QDate dateOfBirth = userData.dob.isEmpty() ? QDate() : QDate::fromString(userData.dob, Qt::ISODate);
+        userModel->setEmail(userData.email);
+        userModel->setName(userData.name);
+        userModel->setDateOfBirth(dateOfBirth);
 
         emit registerSuccess(userData.message);
     }
@@ -89,21 +78,14 @@ void AuthController::onChangePasswordFinished(bool success, const UserData &user
 {
     if (success)
     {
-        if (!userData.user.isEmpty())
-        {
-            // Save to local
-            appState->saveUserInfo(userData.user);
+        // Save to local
+        appState->saveUserInfo(userData);
 
-            // Save to UserModel
-            QString email = userData.user.value("email").toString();
-            QString name = userData.user.value("name").toString();
-            QString dob = userData.user.value("dateOfBirth").toString();
-            QDate dateOfBirth = dob.isEmpty() ? QDate() : QDate::fromString(dob, Qt::ISODate);
-
-            userModel->setEmail(email);
-            userModel->setName(name);
-            userModel->setDateOfBirth(dateOfBirth);
-        }
+        // Save to UserModel
+        QDate dateOfBirth = userData.dob.isEmpty() ? QDate() : QDate::fromString(userData.dob, Qt::ISODate);
+        userModel->setEmail(userData.email);
+        userModel->setName(userData.name);
+        userModel->setDateOfBirth(dateOfBirth);
 
         emit changePasswordSuccess(userData.message);
     }

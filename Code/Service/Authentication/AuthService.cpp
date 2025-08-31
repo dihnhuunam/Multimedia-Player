@@ -16,6 +16,7 @@ void AuthService::loginUser(const QString &email, const QString &password)
     {
         UserData userData;
         userData.message = "Email or password are required";
+        userData.id = -1;
         emit loginFinished(false, userData);
         return;
     }
@@ -31,6 +32,7 @@ void AuthService::loginUser(const QString &email, const QString &password)
     {
         UserData userData;
         userData.message = "Invalid endpoint for login";
+        userData.id = -1;
         emit loginFinished(false, userData);
         return;
     }
@@ -44,6 +46,7 @@ void AuthService::registerUser(const QString &email, const QString &password, co
     {
         UserData userData;
         userData.message = "Email, password, name, and date of birth are required";
+        userData.id = -1;
         emit registerFinished(false, userData);
         return;
     }
@@ -69,6 +72,7 @@ void AuthService::registerUser(const QString &email, const QString &password, co
         {
             UserData userData;
             userData.message = "Invalid dateOfBirth format";
+            userData.id = -1;
             emit registerFinished(false, userData);
             return;
         }
@@ -81,6 +85,7 @@ void AuthService::registerUser(const QString &email, const QString &password, co
     {
         UserData userData;
         userData.message = "Invalid endpoint for register";
+        userData.id = -1;
         emit registerFinished(false, userData);
         return;
     }
@@ -94,6 +99,7 @@ void AuthService::changePassword(const int &userId, const QString &oldPassword, 
     {
         UserData userData;
         userData.message = "Invalid User ID";
+        userData.id = -1;
         emit changePasswordFinished(false, userData);
         return;
     }
@@ -102,6 +108,7 @@ void AuthService::changePassword(const int &userId, const QString &oldPassword, 
     {
         UserData userData;
         userData.message = "Both current and new password are required";
+        userData.id = -1;
         emit changePasswordFinished(false, userData);
         return;
     }
@@ -117,6 +124,7 @@ void AuthService::changePassword(const int &userId, const QString &oldPassword, 
     {
         UserData userData;
         userData.message = "Invalid endpoint for update";
+        userData.id = -1;
         emit changePasswordFinished(false, userData);
         return;
     }
@@ -128,6 +136,7 @@ void AuthService::onLoginReply()
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     UserData userData;
     bool success = false;
+    userData.id = -1; // Default ID
 
     if (!reply)
     {
@@ -149,7 +158,12 @@ void AuthService::onLoginReply()
             if (obj.contains("token") && obj.contains("user"))
             {
                 userData.token = obj["token"].toString();
-                userData.user = obj["user"].toObject();
+                QJsonObject userObj = obj["user"].toObject();
+                userData.email = userObj["email"].toString();
+                userData.name = userObj["name"].toString();
+                userData.dob = userObj["dateOfBirth"].toString();
+                userData.role = userObj["role"].toString();
+                userData.id = userObj.contains("id") ? userObj["id"].toInt() : -1;
                 success = true;
             }
             else
@@ -220,6 +234,7 @@ void AuthService::onRegisterReply()
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     UserData userData;
     bool success = false;
+    userData.id = -1; // Default ID
 
     if (!reply)
     {
@@ -240,9 +255,18 @@ void AuthService::onRegisterReply()
             userData.message = obj["message"].toString();
             if (obj.contains("user"))
             {
-                userData.user = obj["user"].toObject();
+                QJsonObject userObj = obj["user"].toObject();
+                userData.email = userObj["email"].toString();
+                userData.name = userObj["name"].toString();
+                userData.dob = userObj["dateOfBirth"].toString();
+                userData.role = userObj["role"].toString();
+                userData.id = userObj.contains("id") ? userObj["id"].toInt() : -1;
+                success = true;
             }
-            success = true;
+            else
+            {
+                userData.message = "Invalid response from server";
+            }
         }
         else
         {
@@ -307,6 +331,7 @@ void AuthService::onChangePasswordReply()
     QNetworkReply *reply = qobject_cast<QNetworkReply *>(sender());
     UserData userData;
     bool success = false;
+    userData.id = -1; // Default ID
 
     if (!reply)
     {
@@ -319,7 +344,7 @@ void AuthService::onChangePasswordReply()
     QByteArray responseData = reply->readAll();
     QJsonDocument doc = QJsonDocument::fromJson(responseData);
 
-    if (reply->error() == QNetworkReply::NoError && (httpStatus >= 200 && httpStatus < 300))
+    if (reply->error() == QNetworkReply ::NoError && (httpStatus >= 200 && httpStatus < 300))
     {
         if (!doc.isNull() && doc.isObject())
         {
@@ -327,9 +352,18 @@ void AuthService::onChangePasswordReply()
             userData.message = obj["message"].toString();
             if (obj.contains("user"))
             {
-                userData.user = obj["user"].toObject();
+                QJsonObject userObj = obj["user"].toObject();
+                userData.email = userObj["email"].toString();
+                userData.name = userObj["name"].toString();
+                userData.dob = userObj["dateOfBirth"].toString();
+                userData.role = userObj["role"].toString();
+                userData.id = userObj.contains("id") ? userObj["id"].toInt() : -1;
+                success = true;
             }
-            success = true;
+            else
+            {
+                userData.message = "Invalid response from server";
+            }
         }
         else
         {

@@ -10,6 +10,7 @@ target_include_directories(Service
     PUBLIC 
         ${CMAKE_CURRENT_SOURCE_DIR}/App
         ${CMAKE_CURRENT_SOURCE_DIR}/API
+        ${CMAKE_CURRENT_SOURCE_DIR}/Data
         ${CMAKE_CURRENT_SOURCE_DIR}/Authentication
 
 )

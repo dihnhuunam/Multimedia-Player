@@ -77,30 +77,28 @@ void AppState::clearToken()
     }
 }
 
-void AppState::saveUserInfo(const QJsonObject &user)
+void AppState::saveUserInfo(const UserData &userData)
 {
     bool changed = false;
 
     // Handle email
-    QString newEmail = user.contains("email") ? user["email"].toString() : m_email;
-    if (m_email != newEmail)
+    if (m_email != userData.email)
     {
-        m_email = newEmail;
-        m_settings->setValue("user/email", newEmail);
+        m_email = userData.email;
+        m_settings->setValue("user/email", userData.email);
         changed = true;
     }
 
     // Handle name
-    QString newName = user.contains("name") ? user["name"].toString() : m_name;
-    if (m_name != newName)
+    if (m_name != userData.name)
     {
-        m_name = newName;
-        m_settings->setValue("user/name", newName);
+        m_name = userData.name;
+        m_settings->setValue("user/name", userData.name);
         changed = true;
     }
 
     // Handle date of birth
-    QString newDateOfBirth = user.contains("dateOfBirth") ? user["dateOfBirth"].toString() : m_dateOfBirth;
+    QString newDateOfBirth = userData.dob;
     if (!newDateOfBirth.isEmpty())
     {
         QDateTime date = QDateTime::fromString(newDateOfBirth, Qt::ISODate);
@@ -132,20 +130,18 @@ void AppState::saveUserInfo(const QJsonObject &user)
     }
 
     // Handle role
-    QString newRole = user.contains("role") ? user["role"].toString() : m_role;
-    if (m_role != newRole)
+    if (m_role != userData.role)
     {
-        m_role = newRole;
-        m_settings->setValue("user/role", newRole);
+        m_role = userData.role;
+        m_settings->setValue("user/role", userData.role);
         changed = true;
     }
 
     // Handle user ID
-    int newUserId = user.contains("id") ? user["id"].toInt() : m_userId;
-    if (m_userId != newUserId)
+    if (m_userId != userData.id)
     {
-        m_userId = newUserId;
-        m_settings->setValue("user/id", newUserId);
+        m_userId = userData.id;
+        m_settings->setValue("user/id", userData.id);
         changed = true;
     }
 
@@ -221,16 +217,6 @@ void AppState::setRole(const QString &role)
     {
         m_role = role;
         m_settings->setValue("user/role", role);
-        emit valueChanged();
-    }
-}
-
-void AppState::setUserId(int userId)
-{
-    if (m_userId != userId)
-    {
-        m_userId = userId;
-        m_settings->setValue("user/id", userId);
         emit valueChanged();
     }
 }

@@ -2,7 +2,7 @@
 #include <QObject>
 #include <QSettings>
 #include <QString>
-#include <QJsonObject>
+#include "UserData.hpp"
 
 class AppState : public QObject
 {
@@ -12,7 +12,7 @@ public:
 
     void saveToken(const QString &token);
     void clearToken();
-    void saveUserInfo(const QJsonObject &user);
+    void saveUserInfo(const UserData &userData);
     QString getToken() const;
 
     QString getEmail() const;
@@ -25,7 +25,6 @@ public:
     void setName(const QString &name);
     void setDateOfBirth(const QString &dateOfBirth);
     void setRole(const QString &role);
-    void setUserId(int userId);
     void setToken(const QString &token);
 
 signals:
